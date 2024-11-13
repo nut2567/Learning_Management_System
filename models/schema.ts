@@ -1,15 +1,15 @@
 import mongoose, { Schema } from "mongoose";
 
 const useSchema = new Schema({
-    name: String,
-    description: String,
-    availability: Boolean,
-    expiryDate: String,
-    points: Number,
+    Course_Title: String,
+    Instructor_Name: String,
+    Course_Duration: Date,
+    Level : String,
+    Enrollment_Count: Number,
     createdAt: {
         type: Date,
         default: Date.now
-    }, image: String,
+    }, Status: String,
 });
-const Post =   mongoose.models.Post || mongoose.model("Post", useSchema);
-export default Post;
+const Courses =   mongoose.models.Post || mongoose.model("Courses", useSchema);
+export default Courses;

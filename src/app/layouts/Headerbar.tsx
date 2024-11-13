@@ -1,9 +1,18 @@
-"use client";
 import Image from "next/image";
 export default function Layout({}) {
   return (
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 bg-black z-40 sticky top-0">
+    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white z-40 sticky top-0">
       <div className="w-full pl-24 flex font-semibold justify-between items-center p-3 text-sm">
+        <div className=" mx-5 w-auto h-[90px]">
+          <Image
+            className=""
+            src="/logolms.png"
+            alt="Next.js logo"
+            width={300}
+            height={300}
+            priority
+          />
+        </div>
         <div className="flex gap-5">
           <p>Portfolio</p>
           <p>Nutthawat Witdumring</p>
@@ -17,7 +26,7 @@ export default function Layout({}) {
               <a href="https://nextjs.org/" target="_blank" rel="noreferrer">
                 {/* <NextLogo /> */}
                 <Image
-                  className="dark:invert"
+                  className="dark"
                   src="https://nextjs.org/icons/next.svg"
                   alt="Next.js logo"
                   width={90}
