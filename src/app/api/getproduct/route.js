@@ -1,4 +1,4 @@
-import {users} from '../mockData';
+
 import { connetMongoDB } from '@lib/mongodb';
 import Post from '@models/schema';
 import { NextResponse } from 'next/server';
