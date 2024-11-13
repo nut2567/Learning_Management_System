@@ -1,9 +1,9 @@
 import Image from "next/image";
 export default function Layout({}) {
   return (
-    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16 bg-white z-40 sticky top-0">
+    <nav className="w-full flex justify-center border-b border-b-foreground/10 h-[80px] bg-white z-40 sticky top-0">
       <div className="w-full pl-24 flex font-semibold justify-between items-center p-3 text-sm">
-        <div className=" mx-5 w-auto h-[90px]">
+        <div className=" mx-5 w-[70px] h-auto">
           <Image
             className=""
             src="/logolms.png"
