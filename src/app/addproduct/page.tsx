@@ -5,63 +5,47 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Toast from "./Toast";
-
-interface FormData {
-  name: string;
-  image: string;
-  points: string;
-  expiryDate: string;
-  description: string;
-}
+import { useSearchParams } from "next/navigation";
 
 interface Courses {
-  _id: string;
   Course_Title: string;
   Instructor_Name: string;
-  Course_Duration: Date;
+  Course_Duration: number;
   Level: string;
-  Enrollment_Count: Number;
-  createdAt: Date;
+  Enrollment_Count: number;
   Status: string;
   image: string;
 }
 
-interface MyComponentProps {
-  searchParams: { product?: string };
-  session?: boolean;
-}
-
-export default function MyComponent({
-  searchParams,
-  session,
-}: MyComponentProps) {
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
+export default function MyComponent() {
+  const searchParams = useSearchParams();
+  const courseId = searchParams.get("courseId");
+  const [courseData, setCourseData] = useState<Courses>({
+    Course_Title: "",
+    Instructor_Name: "",
+    Course_Duration: 0,
+    Level: "",
+    Enrollment_Count: 0,
+    Status: "",
     image: "",
-    points: "",
-    expiryDate: "",
-    description: "",
   });
   const [valid, setValid] = useState(true);
   const [erMessage, setErMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
-  const idProduct = searchParams.product;
 
   useEffect(() => {
-    if (idProduct) {
+    if (courseId) {
       setIsLoading(true);
       axios
-        .get(`/api/addproduct/${idProduct}`)
+        .get(`/api/course/${courseId}`)
         .then((response) => {
-          const data = response.data.product;
-          setFormData({
-            name: data.name || "",
-            image: data.image || "",
-            points: data.points || "",
-            expiryDate: data.expiryDate || "",
-            description: data.description || "",
+          const data = response.data.course;
+          setCourseData({
+            ...data,
+            Course_Duration: data.Course_Duration,
+            createdAt: new Date(data.createdAt),
           });
           setIsLoading(false);
         })
@@ -70,7 +54,7 @@ export default function MyComponent({
           setErrorState(error.message);
         });
     }
-  }, [idProduct]);
+  }, [courseId]);
 
   const setErrorState = (message: string) => {
     setErMessage(message);
@@ -86,12 +70,26 @@ export default function MyComponent({
     );
   };
 
-  const formSubmitAddProduct = async (e: React.FormEvent) => {
+  const formSubmitCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { name, image, points, expiryDate, description } = formData;
+    const {
+      Course_Title,
+      image,
+      Level,
+      Course_Duration,
+      Status,
+      Instructor_Name,
+    } = courseData;
 
-    if (!name || !description || !points || !expiryDate || !image) {
+    if (
+      !Course_Title ||
+      !Level ||
+      !Status ||
+      !image ||
+      !Course_Duration ||
+      !Instructor_Name
+    ) {
       setErrorState("Please fill all fields correctly!");
       return;
     }
@@ -102,11 +100,9 @@ export default function MyComponent({
     }
 
     axios
-      .post(`/api/addproduct/${idProduct || ""}`, formData)
+      .post(`/api/course/${courseId || ""}`, courseData)
       .then((response) => {
-        if (
-          response.data.message === "สินค้าชื่อนี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น"
-        ) {
+        if (response.data.message === "This course title already exists") {
           setErrorState(response.data.message);
           return;
         }
@@ -121,7 +117,7 @@ export default function MyComponent({
 
   const afterSaveSuccess = () => {
     router.refresh();
-    router.push("/product");
+    router.push("/courses");
   };
 
   return (
@@ -151,48 +147,55 @@ export default function MyComponent({
         </dialog>
       )}
 
-      <Link href="/product">
-        <button className="btn btn-primary">
-          <div className="flex items-center justify-center p-2 rounded">
-            <i className="material-icons mr-2">arrow_back</i>
-            <span className="ml-2">Back to product</span>
-          </div>
-        </button>
-      </Link>
-
       <p className="my-6 text-left text-5xl">
-        {idProduct ? "Edit Product" : "Create Product"}
+        {courseId ? "Edit Course" : "Create Course"}
       </p>
 
-      {session ? (
+      {
         <div>
-          <div className="card bg-base-100 w-3/5 shadow-xl">
-            <form onSubmit={formSubmitAddProduct}>
+          <div className="card bg-base-100 xl:w-3/5 sm:w-full  shadow-xl">
+            <form onSubmit={formSubmitCourse}>
               <div className="card-body gap-4 flex flex-nowrap">
                 {(
                   [
-                    "name",
+                    "Course_Title",
+                    "Instructor_Name",
+                    "Course_Duration",
+                    "Enrollment_Count",
+                    "Level",
+                    "Status",
                     "image",
-                    "points",
-                    "expiryDate",
-                    "description",
                   ] as const
                 ).map((field) => (
-                  <input
-                    key={field}
-                    value={formData[field]}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [field]: e.target.value })
-                    }
-                    type={field === "expiryDate" ? "date" : "text"}
-                    placeholder={field}
-                    className={`border-2 p-2 w-full rounded ${
-                      !valid && !formData[field]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  />
+                  <div key={field} className="xl:flex gap-3">
+                    <label htmlFor={`input-${field}`} className="w-1/5">
+                      {`${field}`}
+                    </label>
+                    <input
+                      id={`input-${field}`}
+                      value={courseData[field] as string}
+                      onChange={(e) =>
+                        setCourseData({
+                          ...courseData,
+                          [field]: e.target.value,
+                        })
+                      }
+                      type={
+                        field === "Course_Duration" ||
+                        field === "Enrollment_Count"
+                          ? "number"
+                          : "text"
+                      }
+                      placeholder={field}
+                      className={`border-2 p-2 w-full rounded ${
+                        !valid && !courseData[field]
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                  </div>
                 ))}
+
                 <Toast
                   message={erMessage}
                   show={!valid}
@@ -205,12 +208,7 @@ export default function MyComponent({
             </form>
           </div>
         </div>
-      ) : (
-        <div className="flex-col text-center flex items-center justify-center h-dvh">
-          <p>Not signed in</p>
-          <span className="loading loading-spinner loading-lg text-info"></span>
-        </div>
-      )}
+      }
     </div>
   );
 }

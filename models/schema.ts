@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const useSchema = new Schema({
     Course_Title: String,
     Instructor_Name: String,
-    Course_Duration: Date,
+    Course_Duration: Number,
     Level : String,
     Enrollment_Count: Number,
     createdAt: {
