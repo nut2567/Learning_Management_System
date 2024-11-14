@@ -1,6 +1,6 @@
 import mongoose  from "mongoose";
 
-export async function connetMongoDB() {
+export async function connectMongoDB() {
     try {
         if (!process.env.MONGODB_URI) {
             throw new Error("MONGODB_URI is not defined");

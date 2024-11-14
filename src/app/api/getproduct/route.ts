@@ -1,12 +1,12 @@
 
-import { connetMongoDB } from '@lib/mongodb';
+import { connectMongoDB } from '@lib/mongodb';
 import Courses from '@models/schema';
 import { NextResponse } from 'next/server';
 
 import mongoose from 'mongoose';
 
 if (mongoose.connection.readyState === 0) {
-  connetMongoDB();
+  connectMongoDB();
 }
 export async function GET() {
     
