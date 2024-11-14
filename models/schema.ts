@@ -10,6 +10,7 @@ const useSchema = new Schema({
         type: Date,
         default: Date.now
     }, Status: String,
+    image: String,
 });
-const Courses =   mongoose.models.Post || mongoose.model("Courses", useSchema);
+const Courses =   mongoose.models.Courses || mongoose.model("Courses", useSchema);
 export default Courses;
