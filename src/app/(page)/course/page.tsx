@@ -123,39 +123,39 @@ export default function MyComponent() {
   };
 
   return (
-    <div className="w-full px-10">
-      {isLoading && (
-        <dialog id="loading_modal" className="modal modal-open">
-          <div className="modal-box text-center">
-            <h3 className="font-bold text-[30px] text-white mb-10 items-end flex">
-              กำลังโหลดข้อมูล
-              <span className="loading loading-dots loading-md"></span>
-            </h3>
-            <span className="loading loading-spinner w-24 text-info"></span>
-          </div>
-        </dialog>
-      )}
-      {isModalOpen && (
-        <dialog open className="modal text-white">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">แจ้งเตือน</h3>
-            <p className="py-4">
-              {erMessage || courseId ? "แก้ไขเรียบร้อย" : "บันทึกเรียบร้อย"}
-            </p>
-            <div className="modal-action">
-              <button onClick={afterSaveSuccess} className="btn">
-                Close
-              </button>
+    <Suspense fallback={<WrapLoading />}>
+      <div className="w-full px-10">
+        {isLoading && (
+          <dialog id="loading_modal" className="modal modal-open">
+            <div className="modal-box text-center">
+              <h3 className="font-bold text-[30px] text-white mb-10 items-end flex">
+                กำลังโหลดข้อมูล
+                <span className="loading loading-dots loading-md"></span>
+              </h3>
+              <span className="loading loading-spinner w-24 text-info"></span>
             </div>
-          </div>
-        </dialog>
-      )}
+          </dialog>
+        )}
+        {isModalOpen && (
+          <dialog open className="modal text-white">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg">แจ้งเตือน</h3>
+              <p className="py-4">
+                {erMessage || courseId ? "แก้ไขเรียบร้อย" : "บันทึกเรียบร้อย"}
+              </p>
+              <div className="modal-action">
+                <button onClick={afterSaveSuccess} className="btn">
+                  Close
+                </button>
+              </div>
+            </div>
+          </dialog>
+        )}
 
-      <p className="my-6 text-left text-5xl">
-        {courseId ? "Edit Course" : "Create Course"}
-      </p>
+        <p className="my-6 text-left text-5xl">
+          {courseId ? "Edit Course" : "Create Course"}
+        </p>
 
-      <Suspense fallback={<WrapLoading />}>
         {
           <div>
             <div className="card bg-base-100 xl:w-3/5 sm:w-full  shadow-xl">
@@ -214,7 +214,7 @@ export default function MyComponent() {
             </div>
           </div>
         }
-      </Suspense>
-    </div>
+      </div>
+    </Suspense>
   );
 }
