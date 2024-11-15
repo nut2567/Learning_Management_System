@@ -32,8 +32,8 @@ export async function GET(req: NextRequest) {
 
 
 
-export async function POST(req : NextRequest, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function POST(req : NextRequest) {
+  const id = req.nextUrl.pathname.split("/").pop(); 
   const time = new Date();
   const {
     Course_Title,
