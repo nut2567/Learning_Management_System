@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     }
 
     const time = new Date();
-    return NextResponse.json({ message: "Success", time, course }, { status: 200 });
+    return NextResponse.json({ message: "Success get By id", time, course }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
@@ -44,11 +44,11 @@ export async function POST(req : NextRequest) {
     Enrollment_Count,
     Status,
   } = await req.json();
-  const existingPost = await Courses.findOne({ Course_Title });
+  const existingPost = await Courses.findOne({ Course_Title,Instructor_Name });
   console.log(existingPost)
   if (existingPost&&existingPost._id.toString() !==id) {
       // ถ้าชื่อสินค้าซ้ำ ให้ส่งข้อความแจ้งเตือนกลับไป
-  return NextResponse.json({message:"สินค้าชื่อนี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น",time},{status: 200})
+  return NextResponse.json({message:"ผู้สอนนี้มีชื่อรายการนี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น",time},{status: 200})
   }
   await Courses.findByIdAndUpdate(id, {Status, image, Enrollment_Count, Level, 
     Course_Duration,

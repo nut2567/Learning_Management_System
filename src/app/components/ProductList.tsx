@@ -1,11 +1,13 @@
 "use client";
 import Image from "next/image";
+import { CiClock2 } from "react-icons/ci";
+import { MdPeople } from "react-icons/md";
 
 export interface Courses {
   _id: string;
   Course_Title: string;
   Instructor_Name: string;
-  Course_Duration: Date;
+  Course_Duration: number;
   Level: string;
   Enrollment_Count: Number;
   createdAt: Date;
@@ -18,12 +20,22 @@ interface ProductListProps {
 }
 
 export default function ProductList({ products }: ProductListProps) {
+  const durationTime = (duration: number) => {
+    const hours = Math.floor(duration); // แยกส่วนชั่วโมง
+    const minutes = Math.round((duration - hours) * 100); // แปลงส่วนทศนิยมเป็นนาที
+    let text = `${hours} hr ${minutes} mins`;
+    console.log(text);
+    return text;
+  };
   return (
-    <div className="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 mt-12 w-full">
+    <div className="grid smb:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12 w-full">
       {products.map((item) => (
-        <div className="card bg-base-100 w-full shadow-xl" key={item._id}>
+        <div
+          className="card bg-white p-4 w-full shadow-xl font-medium"
+          key={item._id}
+        >
           <figure>
-            <div className="relative h-[300px] w-[100%]">
+            <div className="relative h-[222px] w-[100%]">
               <Image
                 src={item.image}
                 alt={item.Course_Title || "Product Image"}
@@ -35,25 +47,36 @@ export default function ProductList({ products }: ProductListProps) {
             </div>
           </figure>
 
-          <div
-            className="card-body text-slate-50"
-            style={{ boxShadow: "#0097ff10 0px -10px 60px inset" }}
-          >
-            <h2 className="card-title">ID: {item._id}</h2>
-            <h2 className="card-title">Name: {item.Course_Title}</h2>
-            <p>
-              Created At:{" "}
-              {new Date(item.createdAt).toLocaleDateString("th-TH", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "numeric",
-                minute: "numeric",
-              })}
-            </p>
-            <p>Description: {item.Instructor_Name}</p>
-            <p>Points: {item.Level}</p>
+          <div className="py-5 border-b-2 mb-4 space-y-2">
+            {/* <h2 className="card-title">ID: {item._id}</h2> */}
+            <h2 className="card-title text-black">{item.Course_Title}</h2>
+            <p>{item.Level}</p>
+            <div className="flex justify-items-center items-center gap-2">
+              <figure>
+                <div className="relative h-[28px] w-[28px] ">
+                  <Image
+                    className="rounded-full"
+                    src={item.image}
+                    alt={item.Course_Title || "Product Image"}
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+              </figure>
+              <p>{item.Instructor_Name}</p>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div className="flex justify-items-center items-center gap-2">
+              <CiClock2 />
+              <p>{durationTime(item.Course_Duration)}</p>
+            </div>
+            <div className="flex justify-items-center items-center gap-2">
+              <MdPeople />
+              <p>{`${item.Enrollment_Count.toLocaleString("th-TH")}`}</p>
+            </div>
           </div>
         </div>
       ))}

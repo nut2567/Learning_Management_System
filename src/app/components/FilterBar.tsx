@@ -94,11 +94,13 @@ export default function FilterBar({
           value={Sort}
           onChange={(e) => setSort(e.target.value)}
         >
-          <option value="">Recommended</option>
+          <option value="Recommended">Recommended</option>
           <option value="A-Z">Course title (A-Z)</option>
           <option value="Z-A">Course title (Z-A)</option>
-          <option value="High">Enrollment count (High to low)</option>
-          <option value="Low">Enrollment count (Low to high)</option>
+          <option value="countHigh">Enrollment count (High to low)</option>
+          <option value="countLow">Enrollment count (Low to high)</option>
+          <option value="durationHigh">Course duration (Hight to low)</option>
+          <option value="durationLow">Course duration (Low to high)</option>
         </select>
       </div>
     </div>

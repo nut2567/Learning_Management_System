@@ -13,5 +13,5 @@ export async function GET() {
   const product = await Courses.find({})
   const time = new Date();
    
-  return NextResponse.json({message:"Success",product,time},{status: 200})
+  return NextResponse.json({message:"Success get List",product,time},{status: 200})
   }

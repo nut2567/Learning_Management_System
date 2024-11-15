@@ -165,7 +165,10 @@ export default function CourseForm() {
             ).map((field) => (
               <div key={field} className="xl:flex gap-3">
                 <label htmlFor={`input-${field}`} className="w-1/5">
-                  {`${field}`}
+                  {`${field}`}{" "}
+                  {field === "Course_Duration"
+                    ? "(Format 6.50 คือ 6ชั่วโมง50นาที)"
+                    : ""}
                 </label>
                 <input
                   id={`input-${field}`}
