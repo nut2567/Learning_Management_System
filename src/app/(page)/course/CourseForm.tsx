@@ -1,9 +1,8 @@
 "use client";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Toast from "./Toast";
-
 interface Courses {
   Course_Title: string;
   Instructor_Name: string;
@@ -14,7 +13,9 @@ interface Courses {
   image: string;
 }
 
-export default function CourseForm({ courseId }: { courseId: string | null }) {
+export default function CourseForm() {
+  const searchParams = useSearchParams();
+  const courseId = searchParams.get("id");
   const [courseData, setCourseData] = useState<Courses>({
     Course_Title: "",
     Instructor_Name: "",
