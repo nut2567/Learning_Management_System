@@ -9,20 +9,27 @@ if (mongoose.connection.readyState === 0) {
 }
 
 
-export async function GET(request: Request, context: { params: { id: string } }) {
-  const { id } = context.params;
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.pathname.split("/").pop(); // ดึง ID จาก URL
+  
+  if (!id) {
+    return NextResponse.json({ error: "ไม่พบ ID" }, { status: 400 });
+  }
+
   try {
     const course = await Courses.findById(id);
+    
     if (!course) {
-      return NextResponse.json({ error: 'ไม่พบข้อมูลคอร์ส' }, { status: 404 });
+      return NextResponse.json({ error: "ไม่พบข้อมูลคอร์ส" }, { status: 404 });
     }
 
     const time = new Date();
     return NextResponse.json({ message: "Success", time, course }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
+    return NextResponse.json({ error: "เกิดข้อผิดพลาด" }, { status: 500 });
   }
 }
+
 
 
 export async function POST(req : NextRequest, { params }: { params: { id: string } }) {
