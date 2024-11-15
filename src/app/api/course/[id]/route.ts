@@ -9,22 +9,19 @@ if (mongoose.connection.readyState === 0) {
 }
 
 
-export async function GET({ params }: { params?: { id?: string } }) {
-  if (!params?.id) {
-    return NextResponse.json(
-      { message: "ID parameter is missing" },
-      { status: 400 }
-    );
+export async function GET(request: Request, context: { params: { id: string } }) {
+  const { id } = context.params;
+  try {
+    const course = await Courses.findById(id);
+    if (!course) {
+      return NextResponse.json({ error: 'ไม่พบข้อมูลคอร์ส' }, { status: 404 });
+    }
+
+    const time = new Date();
+    return NextResponse.json({ message: "Success", time, course }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 });
   }
-
-  const { id } = params;
-  const product = await Courses.findById(id);
-  const time = new Date();
-
-  return NextResponse.json(
-    { message: "Success", time, product },
-    { status: 200 }
-  );
 }
 
 

@@ -101,7 +101,7 @@ export default function MyComponent() {
     }
 
     axios
-      .post(`/api/addproduct/${courseId || ""}`, courseData)
+      .post(`/api/course/${courseId || ""}`, courseData)
       .then((response) => {
         if (response.data.message === "This course title already exists") {
           setErrorState(response.data.message);
@@ -138,7 +138,9 @@ export default function MyComponent() {
         <dialog open className="modal text-white">
           <div className="modal-box">
             <h3 className="font-bold text-lg">แจ้งเตือน</h3>
-            <p className="py-4">{erMessage || "บันทึกเรียบร้อย"}</p>
+            <p className="py-4">
+              {erMessage || courseId ? "แก้ไขเรียบร้อย" : "บันทึกเรียบร้อย"}
+            </p>
             <div className="modal-action">
               <button onClick={afterSaveSuccess} className="btn">
                 Close
