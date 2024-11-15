@@ -9,7 +9,7 @@ if (mongoose.connection.readyState === 0) {
 }
 
 
-export async function GET(request: Request, context: { params: { id: string } }) {
+export async function GET( context: { params: { id: string } }) {
   const { id } = context.params;
   try {
     const course = await Courses.findById(id);
