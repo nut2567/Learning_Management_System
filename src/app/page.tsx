@@ -6,7 +6,7 @@ import WrapLoading from "@/app/layouts/WrapLoadind";
 import FilterBar from "@/app/components/FilterBar";
 import ProductList, { Courses } from "@/app/components/ProductList";
 
-export async function getProduct() {
+export async function GetProduct() {
   // ใช้ await รอให้ axios.get() ดึงข้อมูลเสร็จสิ้น
   const resp = await axios.get(`/api/getcourse`);
 
@@ -32,7 +32,7 @@ export default function Home() {
 
   const fetchProduct = async () => {
     try {
-      const productData = await getProduct(); // รอการดึงข้อมูลจาก getProduct
+      const productData = await GetProduct(); // รอการดึงข้อมูลจาก getProduct
       setProduct(productData || []);
     } catch (err) {
       console.error(err);
