@@ -1,11 +1,12 @@
 "use client";
 
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Toast from "./Toast";
 import { useSearchParams } from "next/navigation";
+import WrapLoading from "@/app/layouts/WrapLoadind";
 
 interface Courses {
   Course_Title: string;
@@ -154,64 +155,66 @@ export default function MyComponent() {
         {courseId ? "Edit Course" : "Create Course"}
       </p>
 
-      {
-        <div>
-          <div className="card bg-base-100 xl:w-3/5 sm:w-full  shadow-xl">
-            <form onSubmit={formSubmitCourse}>
-              <div className="card-body gap-4 flex flex-nowrap">
-                {(
-                  [
-                    "Course_Title",
-                    "Instructor_Name",
-                    "Course_Duration",
-                    "Enrollment_Count",
-                    "Level",
-                    "Status",
-                    "image",
-                  ] as const
-                ).map((field) => (
-                  <div key={field} className="xl:flex gap-3">
-                    <label htmlFor={`input-${field}`} className="w-1/5">
-                      {`${field}`}
-                    </label>
-                    <input
-                      id={`input-${field}`}
-                      value={courseData[field] as string}
-                      onChange={(e) =>
-                        setCourseData({
-                          ...courseData,
-                          [field]: e.target.value,
-                        })
-                      }
-                      type={
-                        field === "Course_Duration" ||
-                        field === "Enrollment_Count"
-                          ? "number"
-                          : "text"
-                      }
-                      placeholder={field}
-                      className={`border-2 p-2 w-full rounded ${
-                        !valid && !courseData[field]
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
-                    />
-                  </div>
-                ))}
+      <Suspense fallback={<WrapLoading />}>
+        {
+          <div>
+            <div className="card bg-base-100 xl:w-3/5 sm:w-full  shadow-xl">
+              <form onSubmit={formSubmitCourse}>
+                <div className="card-body gap-4 flex flex-nowrap">
+                  {(
+                    [
+                      "Course_Title",
+                      "Instructor_Name",
+                      "Course_Duration",
+                      "Enrollment_Count",
+                      "Level",
+                      "Status",
+                      "image",
+                    ] as const
+                  ).map((field) => (
+                    <div key={field} className="xl:flex gap-3">
+                      <label htmlFor={`input-${field}`} className="w-1/5">
+                        {`${field}`}
+                      </label>
+                      <input
+                        id={`input-${field}`}
+                        value={courseData[field] as string}
+                        onChange={(e) =>
+                          setCourseData({
+                            ...courseData,
+                            [field]: e.target.value,
+                          })
+                        }
+                        type={
+                          field === "Course_Duration" ||
+                          field === "Enrollment_Count"
+                            ? "number"
+                            : "text"
+                        }
+                        placeholder={field}
+                        className={`border-2 p-2 w-full rounded ${
+                          !valid && !courseData[field]
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </div>
+                  ))}
 
-                <Toast
-                  message={erMessage}
-                  show={!valid}
-                  onClose={() => setValid(true)}
-                />
-                <button type="submit" className="btn btn-success">
-                  Submit
-                </button>
-              </div>
-            </form>
+                  <Toast
+                    message={erMessage}
+                    show={!valid}
+                    onClose={() => setValid(true)}
+                  />
+                  <button type="submit" className="btn btn-success">
+                    Submit
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      }
+        }
+      </Suspense>
     </div>
   );
 }
