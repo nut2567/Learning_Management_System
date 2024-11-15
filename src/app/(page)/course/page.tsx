@@ -19,7 +19,7 @@ interface Courses {
 
 export default function MyComponent() {
   const searchParams = useSearchParams();
-  const courseId = searchParams.get("courseId");
+  const courseId = searchParams.get("id");
   const [courseData, setCourseData] = useState<Courses>({
     Course_Title: "",
     Instructor_Name: "",
@@ -54,7 +54,7 @@ export default function MyComponent() {
           setErrorState(error.message);
         });
     }
-  }, [courseId]);
+  }, []);
 
   const setErrorState = (message: string) => {
     setErMessage(message);
@@ -64,8 +64,9 @@ export default function MyComponent() {
 
   const checkImageValidity = (url: string): boolean => {
     const imageRegex = /\.(jpeg|jpg|gif|png|bmp|webp)$/i;
+    const cleanUrl = url.split("?")[0]; // ตัด query string ออก
     return (
-      imageRegex.test(url) &&
+      imageRegex.test(cleanUrl) &&
       (url.startsWith("http://") || url.startsWith("https://"))
     );
   };
@@ -93,14 +94,14 @@ export default function MyComponent() {
       setErrorState("Please fill all fields correctly!");
       return;
     }
-
+    console.log(courseData, checkImageValidity(image));
     if (!checkImageValidity(image)) {
       setErrorState("Invalid image URL");
       return;
     }
 
     axios
-      .post(`/api/course/${courseId || ""}`, courseData)
+      .post(`/api/addproduct/${courseId || ""}`, courseData)
       .then((response) => {
         if (response.data.message === "This course title already exists") {
           setErrorState(response.data.message);
@@ -117,7 +118,7 @@ export default function MyComponent() {
 
   const afterSaveSuccess = () => {
     router.refresh();
-    router.push("/courses");
+    router.push("/");
   };
 
   return (

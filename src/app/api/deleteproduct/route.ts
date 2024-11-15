@@ -1,5 +1,5 @@
 import { connectMongoDB } from "@lib/mongodb";
-import Post from "@models/schema";
+import Courses from "@models/schema";
 import mongoose from "mongoose";
 import { NextResponse, NextRequest } from "next/server";
 
@@ -7,7 +7,7 @@ if (mongoose.connection.readyState === 0) {
   connectMongoDB();
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
 
   if (!id) {
@@ -15,7 +15,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await Post.findByIdAndDelete(id);
+    await Courses.findByIdAndDelete(id);
     const time = new Date();
     return NextResponse.json({ message: "Success delete product", time }, { status: 200 });
   } catch (error) {

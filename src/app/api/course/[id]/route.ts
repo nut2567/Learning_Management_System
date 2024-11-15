@@ -1,32 +1,54 @@
 import { NextResponse, NextRequest } from "next/server";
 import mongoose from 'mongoose';
 import { connectMongoDB } from '@lib/mongodb';
-import Post from '@models/schema';
+import Courses from '@models/schema';
 
 // เชื่อมต่อกับ MongoDB ก่อนที่จะเรียกใช้ API
 if (mongoose.connection.readyState === 0) {
   connectMongoDB();
 }
 
-export async function GET({ params }: { params: { id: string } }) {
+
+export async function GET({ params }: { params?: { id?: string } }) {
+  if (!params?.id) {
+    return NextResponse.json(
+      { message: "ID parameter is missing" },
+      { status: 400 }
+    );
+  }
+
   const { id } = params;
-  const product = await Post.findById(id);
+  const product = await Courses.findById(id);
   const time = new Date();
 
-  return NextResponse.json({ message: "Success", time, product }, { status: 200 });
+  return NextResponse.json(
+    { message: "Success", time, product },
+    { status: 200 }
+  );
 }
+
 
 export async function POST(req : NextRequest, { params }: { params: { id: string } }) {
   const { id } = params;
   const time = new Date();
-  const { name, image, points, expiryDate, description } = await req.json();
-  const existingPost = await Post.findOne({ name });
+  const {
+    Course_Title,
+    image,
+    Instructor_Name,
+    Course_Duration,
+    Level,
+    Enrollment_Count,
+    Status,
+  } = await req.json();
+  const existingPost = await Courses.findOne({ Course_Title });
   console.log(existingPost)
   if (existingPost&&existingPost._id.toString() !==id) {
       // ถ้าชื่อสินค้าซ้ำ ให้ส่งข้อความแจ้งเตือนกลับไป
   return NextResponse.json({message:"สินค้าชื่อนี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น",time},{status: 200})
   }
-  await Post.findByIdAndUpdate(id, { name, image, points, expiryDate, description });
+  await Courses.findByIdAndUpdate(id, {Status, image, Enrollment_Count, Level, 
+    Course_Duration,
+    Instructor_Name,Course_Title});
 
   return NextResponse.json({ message: "Success update product", time }, { status: 200 });
 }

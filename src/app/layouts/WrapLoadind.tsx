@@ -1,7 +1,7 @@
 // app/users/loading.tsx
 export default function WrapLoading() {
   return (
-    <div className="flex-col text-center flex items-center  justify-center h-dvh">
+    <div className="flex-col text-center flex items-center w-full justify-items-center py-12">
       <p className="text-3xl flex items-end  justify-end mb-4">
         กำลังโหลดข้อมูล
         <span className="loading loading-dots loading-lg"></span>
