@@ -6,18 +6,37 @@ import WrapLoading from "@/app/layouts/WrapLoadind";
 import FilterBar from "@/app/components/FilterBar";
 import ProductList, { Courses } from "@/app/components/ProductList";
 
-async function GetProduct() {
-  // ใช้ await รอให้ axios.get() ดึงข้อมูลเสร็จสิ้น
-  const resp = await axios.get(`/api/getcourse`);
+import ReactPaginate from "react-paginate";
+async function getProduct(
+  page = 1,
+  limit = 9,
+  filters = { Instructor: "", Status: "", Level: "", Sort: "" }
+) {
+  try {
+    // ดึงค่าจาก filters
+    const { Instructor, Status, Level, Sort } = filters;
 
-  // ตรวจสอบ response ใน console
-  console.log(resp);
-  // Check if there is product data in the response
-  // ตั้งค่า state ด้วยข้อมูลที่ได้จาก API
-  if (resp.data && resp.data.product) {
-    return resp.data.product; // Set product data
-  } else {
-    return null; // No product data found
+    // สร้าง params object สำหรับ axios
+    const params: any = { page, limit };
+
+    // เพิ่มค่าที่ไม่ว่างลงใน params
+    if (Instructor) params.Instructor = Instructor;
+    if (Status) params.Status = Status;
+    if (Level) params.Level = Level;
+    if (Sort) params.Sort = Sort;
+
+    // ทำการเรียก API
+    const resp = await axios.get(`/api/getcourse`, { params });
+
+    // ตรวจสอบและส่งข้อมูลที่ได้รับ
+    if (resp.data && resp.data.product) {
+      return resp.data; // Return data from response
+    } else {
+      return { product: [], total: 0 }; // Return empty data if no products
+    }
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return { product: [], total: 0 };
   }
 }
 
@@ -30,10 +49,18 @@ export default function Home() {
   const [Level, setLevel] = useState("");
   const [Sort, setSort] = useState("");
 
-  const fetchProduct = async () => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const fetchProduct = async (page: number) => {
+    page = page == 0 ? 1 : page + 1;
+    setIsLoading(true);
     try {
-      const productData = await GetProduct(); // รอการดึงข้อมูลจาก getProduct
-      setProduct(productData || []);
+      const limit = 9;
+      const filters = { Instructor, Status, Level, Sort };
+      const response = await getProduct(page, limit, filters);
+      setProduct(response.product || []);
+      setTotalPages(Math.ceil(response.total / limit));
     } catch (err) {
       console.error(err);
       setError("Failed to load product data");
@@ -41,10 +68,22 @@ export default function Home() {
       setIsLoading(false);
     }
   };
-  // ใช้ useEffect เพื่อเรียก เมื่อ component ถูก mount
+
   useEffect(() => {
-    fetchProduct(); // เรียกใช้ฟังก์ชันดึงข้อมูล
-  }, [Level, Status, Instructor, Sort]); // [] เพื่อให้ฟังก์ชันทำงานแค่ครั้งเดียวเมื่อ component mount
+    // รีเซ็ตหน้าเป็นหน้าแรกเมื่อ Filter เปลี่ยน
+    fetchProduct(0);
+  }, [Level, Status, Instructor, Sort]);
+
+  // ทำงานเมื่อ currentPage เปลี่ยน
+  useEffect(() => {
+    fetchProduct(currentPage);
+  }, [currentPage]);
+
+  const handlePageChange = (selectedItem: { selected: number }) => {
+    let next = selectedItem.selected;
+    console.log(next);
+    setCurrentPage(next); // อัปเดต currentPage ตามที่เลือกใน ReactPaginate
+  };
 
   return (
     <div
@@ -82,7 +121,54 @@ export default function Home() {
             <p className="text-[14px]">Try to remove filters and sorting</p>
           </div> // แสดงข้อความเมื่อไม่มีข้อมูล
         ) : (
-          <ProductList products={product} />
+          <div className="w-full">
+            <ProductList products={product} />
+            {/* Pagination */}
+            <ReactPaginate
+              // previousLabel={<span>{"<"}</span>}
+              // nextLabel={<span>{">"}</span>}
+              previousLabel={
+                <button className="py-2 px-4 border font-bold  rounded-md cursor-pointer hover:bg-gray-300 transition">
+                  {"<"}
+                </button>
+              }
+              previousClassName=""
+              nextLabel={
+                <button className="py-2 px-4 border font-bold rounded-md cursor-pointer hover:bg-gray-300 transition">
+                  {">"}
+                </button>
+              }
+              nextClassName=""
+              pageLinkClassName="page-button"
+              pageLabelBuilder={(page: number) => (
+                <button
+                  className={`py-2 px-4 border font-bold rounded-md
+                    ${
+                      currentPage === page - 1
+                        ? "bg-[##E3EBFF] text-blue-500 border-blue-500"
+                        : " bg-white"
+                    }
+                  `}
+                >
+                  {page}
+                </button>
+              )}
+              pageClassName=""
+              activeClassName={""}
+              pageCount={totalPages}
+              breakLabel={
+                <button className="py-2 px-4 border font-bold rounded-md">
+                  ...
+                </button>
+              }
+              breakClassName=""
+              marginPagesDisplayed={2}
+              pageRangeDisplayed={3}
+              onPageChange={handlePageChange}
+              containerClassName="flex justify-center mt-8 space-x-2"
+              forcePage={currentPage} // เพิ่ม forcePage เพื่อให้ sync กับ currentPage
+            />
+          </div>
         )}
       </main>
     </div>

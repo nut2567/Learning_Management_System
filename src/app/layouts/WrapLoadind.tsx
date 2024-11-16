@@ -1,21 +1,39 @@
 // app/users/loading.tsx
+function Loading() {
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <div className=" customskeleton h-52 w-full"></div>
+      <div className="flex gap-4">
+        <div className=" customskeleton h-5 w-1/3"></div>
+        <div className=" customskeleton h-5 w-1/3"></div>
+      </div>
+      <div className=" customskeleton h-4 w-full"></div>
+      <div className=" customskeleton h-4 w-full"></div>
+
+      <div className="flex justify-between gap-4  w-full">
+        <div className="flex gap-2  items-center w-full">
+          <div className=" customskeleton h-6 w-6"></div>
+          <div className=" customskeleton h-5 w-3/4"></div>
+        </div>
+        <div className="flex gap-2  items-center w-full">
+          <div className=" customskeleton h-6 w-6"></div>
+          <div className=" customskeleton h-5 w-3/4"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function WrapLoading() {
   return (
-    <div className="flex-col text-center flex items-center w-full justify-items-center py-12">
-      <p className="text-3xl flex items-end  justify-end mb-4">
+    <div className="w-full">
+      <p className="text-3xl flex items-center  justify-center my-12">
         กำลังโหลดข้อมูล
         <span className="loading loading-dots loading-lg"></span>
       </p>
-
-      <div className="flex w-52 flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <div className="skeleton h-16 w-16 shrink-0 rounded-full"></div>
-          <div className="flex flex-col gap-4">
-            <div className="skeleton h-4 w-20"></div>
-            <div className="skeleton h-4 w-28"></div>
-          </div>
-        </div>
-        <div className="skeleton h-32 w-full"></div>
+      <div className="grid smb:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4  w-full">
+        <Loading />
+        <Loading />
+        <Loading />
       </div>
     </div>
   );

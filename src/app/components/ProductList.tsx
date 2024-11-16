@@ -24,9 +24,10 @@ export default function ProductList({ products }: ProductListProps) {
     const hours = Math.floor(duration); // แยกส่วนชั่วโมง
     const minutes = Math.round((duration - hours) * 100); // แปลงส่วนทศนิยมเป็นนาที
     let text = `${hours} hr ${minutes} mins`;
-    console.log(text);
+    // console.log(text);
     return text;
   };
+
   return (
     <div className="grid smb:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12 w-full">
       {products.map((item) => (
