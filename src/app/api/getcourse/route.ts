@@ -1,7 +1,7 @@
 import { connectMongoDB } from "@lib/mongodb";
 import Courses from "@models/schema";
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 // เชื่อมต่อ MongoDB
 if (mongoose.connection.readyState === 0) {
@@ -11,7 +11,6 @@ if (mongoose.connection.readyState === 0) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
-  // อ่านค่า Filter จาก Query Parameters
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "9");
   const Instructor = searchParams.get("Instructor") || "";
@@ -19,11 +18,11 @@ export async function GET(request: Request) {
   const Level = searchParams.get("Level") || "";
   const Sort = searchParams.get("Sort") || "";
 
-  // Query Object สำหรับ MongoDB
   const query: any = {};
 
   if (Instructor) {
-    query.Instructor_Name = { $regex: new RegExp(Instructor, "i") }; // ใช้ regex เพื่อค้นหาชื่อ Instructor
+    const userObjectId = new Types.ObjectId(Instructor);
+    query.userId = userObjectId;
   }
 
   if (Status) {
@@ -34,38 +33,32 @@ export async function GET(request: Request) {
     query.Level = Level;
   }
 
-  // ตัวเลือกการเรียงลำดับ
   let sortOption = {};
   let product;
 
   if (Sort === "A-Z") {
-    sortOption = { Course_Title: 1 }; // เรียงตามชื่อ (A-Z)
+    sortOption = { Course_Title: 1 };
   } else if (Sort === "Z-A") {
-    sortOption = { Course_Title: -1 }; // เรียงตามชื่อ (Z-A)
+    sortOption = { Course_Title: -1 };
   } else if (Sort === "countHigh") {
-    sortOption = { Enrollment_Count: -1 }; // เรียงตามจำนวนผู้สมัคร (มากไปน้อย)
+    sortOption = { Enrollment_Count: -1 };
   } else if (Sort === "countLow") {
-    sortOption = { Enrollment_Count: 1 }; // เรียงตามจำนวนผู้สมัคร (น้อยไปมาก)
+    sortOption = { Enrollment_Count: 1 };
   } else if (Sort === "durationHigh") {
-    sortOption = { Course_Duration: -1 }; // เรียงตามจำนวนเข้าเรียน (มากไปน้อย)
+    sortOption = { Course_Duration: -1 };
   } else if (Sort === "durationLow") {
-    sortOption = { Course_Duration: 1 }; // เรียงตามจำนวนเข้าเรียน (น้อยไปมาก)
+    sortOption = { Course_Duration: 1 };
   } else {
-    // sortOption = { createdAt: 1 }; // เรียงตามวันที่สร้าง (เก่าสุด)
-    sortOption = "random"
+    sortOption = "random";
   }
 
   try {
-    // คำนวณ skip สำหรับการ paginate
     const skip = (page - 1) * limit;
 
-    // ดึงข้อมูลจาก MongoDB พร้อม Populate ข้อมูลผู้ใช้
-
     if (sortOption === "random") {
-      // ใช้ aggregate และ $sample เพื่อสุ่มข้อมูล
       product = await Courses.aggregate([
-        { $match: query },  // ใช้เงื่อนไขการค้นหา (query)
-        { $sample: { size: limit } } // ใช้ $sample เพื่อสุ่มข้อมูล
+        { $match: query },
+        { $sample: { size: limit } }
       ]);
     } else {
       product = await Courses.find(query)
@@ -75,13 +68,11 @@ export async function GET(request: Request) {
         .limit(limit);
     }
 
-    // ใช้ populate หลังจากดึงข้อมูล
     product = await Courses.populate(product, {
       path: 'userId',
       select: 'Instructor_Name email image phone'
     });
 
-    // นับจำนวนทั้งหมดสำหรับคำนวณ Total Pages
     const total = await Courses.countDocuments(query);
 
     return NextResponse.json(
@@ -96,3 +87,4 @@ export async function GET(request: Request) {
     );
   }
 }
+
