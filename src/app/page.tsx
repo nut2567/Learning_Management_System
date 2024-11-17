@@ -5,7 +5,6 @@ import axios from "axios";
 import WrapLoading from "@/app/layouts/WrapLoadind";
 import FilterBar from "@/app/components/FilterBar";
 import ProductList, { Courses } from "@/app/components/ProductList";
-
 import ReactPaginate from "react-paginate";
 async function getProduct(
   page = 1,
