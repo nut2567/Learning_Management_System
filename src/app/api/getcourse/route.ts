@@ -36,6 +36,8 @@ export async function GET(request: Request) {
 
   // ตัวเลือกการเรียงลำดับ
   let sortOption = {};
+  let product;
+
   if (Sort === "A-Z") {
     sortOption = { Course_Title: 1 }; // เรียงตามชื่อ (A-Z)
   } else if (Sort === "Z-A") {
@@ -49,18 +51,35 @@ export async function GET(request: Request) {
   } else if (Sort === "durationLow") {
     sortOption = { Course_Duration: 1 }; // เรียงตามจำนวนเข้าเรียน (น้อยไปมาก)
   } else {
-    sortOption = { createdAt: 1 }; // เรียงตามวันที่สร้าง (เก่าสุด)
+    // sortOption = { createdAt: 1 }; // เรียงตามวันที่สร้าง (เก่าสุด)
+    sortOption = "random"
   }
 
   try {
     // คำนวณ skip สำหรับการ paginate
     const skip = (page - 1) * limit;
 
-    // ดึงข้อมูลจาก MongoDB ด้วย Filter และ Pagination
-    const product = await Courses.find(query)
-      .sort(sortOption)
-      .skip(skip)
-      .limit(limit);
+    // ดึงข้อมูลจาก MongoDB พร้อม Populate ข้อมูลผู้ใช้
+
+    if (sortOption === "random") {
+      // ใช้ aggregate และ $sample เพื่อสุ่มข้อมูล
+      product = await Courses.aggregate([
+        { $match: query },  // ใช้เงื่อนไขการค้นหา (query)
+        { $sample: { size: limit } } // ใช้ $sample เพื่อสุ่มข้อมูล
+      ]);
+    } else {
+      product = await Courses.find(query)
+        .sort(sortOption)
+        .collation({ locale: "en", strength: 2 })
+        .skip(skip)
+        .limit(limit);
+    }
+
+    // ใช้ populate หลังจากดึงข้อมูล
+    product = await Courses.populate(product, {
+      path: 'userId',
+      select: 'Instructor_Name email image phone'
+    });
 
     // นับจำนวนทั้งหมดสำหรับคำนวณ Total Pages
     const total = await Courses.countDocuments(query);

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Toast from "./Toast";
 interface Courses {
   Course_Title: string;
-  Instructor_Name: string;
+  userId: string;
   Course_Duration: number;
   Level: string;
   Enrollment_Count: number;
@@ -18,7 +18,7 @@ export default function CourseForm() {
   const courseId = searchParams.get("id");
   const [courseData, setCourseData] = useState<Courses>({
     Course_Title: "",
-    Instructor_Name: "",
+    userId: "",
     Course_Duration: 0,
     Level: "",
     Enrollment_Count: 0,
@@ -69,14 +69,8 @@ export default function CourseForm() {
   const formSubmitCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const {
-      Course_Title,
-      image,
-      Level,
-      Course_Duration,
-      Status,
-      Instructor_Name,
-    } = courseData;
+    const { Course_Title, image, Level, Course_Duration, Status, userId } =
+      courseData;
 
     if (
       !Course_Title ||
@@ -84,7 +78,7 @@ export default function CourseForm() {
       !Status ||
       !image ||
       !Course_Duration ||
-      !Instructor_Name
+      !userId
     ) {
       setErrorState("Please fill all fields correctly!");
       return;
@@ -155,7 +149,7 @@ export default function CourseForm() {
             {(
               [
                 "Course_Title",
-                "Instructor_Name",
+                "userId",
                 "Course_Duration",
                 "Enrollment_Count",
                 "Level",

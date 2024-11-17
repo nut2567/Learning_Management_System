@@ -8,7 +8,14 @@ import BtnStatus from "@/app/components/StatusBtn";
 export interface Courses {
   _id: string;
   Course_Title: string;
-  Instructor_Name: string;
+  userId: {
+    Instructor_Name: String;
+    age: Number;
+    email: String;
+    createdAt: Date;
+    image: string;
+    phone: String;
+  };
   Course_Duration: number;
   Level: string;
   Enrollment_Count: Number;
@@ -62,8 +69,8 @@ export default function ProductList({ products }: ProductListProps) {
                 <div className="relative h-[28px] w-[28px] ">
                   <Image
                     className="rounded-full"
-                    src={item.image}
-                    alt={item.Course_Title || "Product Image"}
+                    src={item.userId.image}
+                    alt={"Instructor_Name Image"}
                     fill
                     priority
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -71,7 +78,7 @@ export default function ProductList({ products }: ProductListProps) {
                   />
                 </div>
               </figure>
-              <p>{item.Instructor_Name}</p>
+              <p>{item.userId.Instructor_Name}</p>
             </div>
           </div>
           <div className="flex justify-between">
