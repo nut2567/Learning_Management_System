@@ -44,7 +44,7 @@ export default function FilterBar({
   return (
     <div
       id="filter"
-      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 py-4 w-full"
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4  py-4 w-full"
     >
       {/* Instructor Filter */}
       <div className="flex flex-col space-y-2">

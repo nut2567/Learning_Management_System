@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Toast from "./Toast";
+import Toast from "../components/Toast";
 interface Courses {
   Course_Title: string;
   userId: string;
