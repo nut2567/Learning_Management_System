@@ -27,7 +27,7 @@ interface ProductListProps {
   products: Courses[];
 }
 
-export default function ProductList({ products }: ProductListProps) {
+export default function ProductList({ products = [] }: ProductListProps) {
   const durationTime = (duration: number) => {
     const hours = Math.floor(duration); // แยกส่วนชั่วโมง
     const minutes = Math.round((duration - hours) * 100); // แปลงส่วนทศนิยมเป็นนาที
