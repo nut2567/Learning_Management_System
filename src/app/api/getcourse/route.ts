@@ -55,18 +55,18 @@ export async function GET(request: Request) {
   try {
     const skip = (page - 1) * limit;
 
-    if (sortOption === "random") {
-      product = await Courses.aggregate([
-        { $match: query },
-        { $sample: { size: limit } }
-      ]);
-    } else {
-      product = await Courses.find(query)
-        .sort(sortOption)
-        .collation({ locale: "en", strength: 2 })
-        .skip(skip)
-        .limit(limit);
-    }
+    // if (sortOption === "random") {
+    //   product = await Courses.aggregate([
+    //     { $match: query },
+    //     { $sample: { size: limit } }
+    //   ]);
+    // } else {
+    product = await Courses.find(query)
+      .sort(sortOption)
+      .collation({ locale: "en", strength: 2 })
+      .skip(skip)
+      .limit(limit);
+    // }
 
     product = await Courses.populate(product, {
       path: 'userId',

@@ -24,7 +24,7 @@ export async function GetProduct(
     // ทำการเรียก API
     console.log(data);
     // ตรวจสอบและส่งข้อมูลที่ได้รับ
-    if (data && data.courses) {
+    if (data && data.product) {
       return data; // Return data from response
     } else {
       return { product: [], total: 0 }; // Return empty data if no products

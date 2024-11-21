@@ -15,7 +15,7 @@ export default function Home({
   initialProducts: any;
   initialinstructor: any;
 }) {
-  const [product, setProduct] = useState<Courses[]>(initialProducts.courses); // ใช้ useState เพื่อจัดเก็บข้อมูล user
+  const [product, setProduct] = useState<Courses[]>(initialProducts.product); // ใช้ useState เพื่อจัดเก็บข้อมูล user
   const [user, setUser] = useState<User[]>(initialinstructor);
   const [isLoading, setIsLoading] = useState(false); // Tracks loading state
   const [error, setError] = useState(""); // Tracks errors if they occur
@@ -26,17 +26,21 @@ export default function Home({
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   const limit = 9;
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialProducts.total / limit);
 
   const fetchProduct = async (page: number) => {
-    page = page == 0 ? 1 : page + 1;
+    page = page ? page : 1;
     setIsLoading(true);
     try {
       const filters = { Instructor, Status, Level, Sort };
       const response = await GetProduct(page, limit, filters);
-      setProduct(response.courses || []);
-      setTotalPages(Math.ceil(response.total / limit));
+      setProduct(response.product || []);
+      if (response.total != 0) {
+        setTotalPages(Math.ceil(response.total / limit));
+      } else {
+        setTotalPages(0);
+      }
       setUser(await GetInstructors());
     } catch (err) {
       console.error(err);
@@ -53,7 +57,7 @@ export default function Home({
     }
 
     // รีเซ็ตหน้าเป็นหน้าแรกเมื่อ Filter เปลี่ยน
-    fetchProduct(0);
+    fetchProduct(1);
   }, [Level, Status, Instructor, Sort]);
 
   // ทำงานเมื่อ currentPage เปลี่ยน
@@ -121,7 +125,7 @@ export default function Home({
                 <button
                   className={`py-2 px-4 border font-bold rounded-md
                     ${
-                      currentPage === page - 1
+                      currentPage === page
                         ? "bg-[##E3EBFF] text-blue-500 border-blue-500"
                         : " bg-white"
                     }
@@ -132,7 +136,6 @@ export default function Home({
               )}
               pageClassName=""
               activeClassName={""}
-              pageCount={totalPages}
               breakLabel={
                 <button className="py-2 px-4 border font-bold rounded-md">
                   ...
@@ -144,6 +147,7 @@ export default function Home({
               onPageChange={handlePageChange}
               containerClassName="flex justify-center mt-8 space-x-2"
               forcePage={currentPage} // เพิ่ม forcePage เพื่อให้ sync กับ currentPage
+              pageCount={totalPages}
             />
           </div>
         )}
