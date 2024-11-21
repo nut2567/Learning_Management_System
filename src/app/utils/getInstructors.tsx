@@ -2,8 +2,8 @@ import axios from "axios";
 export default async function GetInstructors() {
   try {
     const baseURL =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
-    const { data } = await axios.get(`${baseURL}/api/instructor`);
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4400";
+    const { data } = await axios.get(`${baseURL}/api/getInstructor`);
     console.log(data);
     // ตรวจสอบและส่งข้อมูล
     if (data && data.userList) {

@@ -19,7 +19,7 @@ export async function GetProduct(
     if (Sort) params.Sort = Sort;
 
     const baseURL =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4400";
     const { data } = await axios.get(`${baseURL}/api/getcourse`, { params });
     // ทำการเรียก API
     console.log(data);

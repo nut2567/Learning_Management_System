@@ -13,7 +13,7 @@ interface FilterBarProps {
 }
 
 export interface User {
-  id: string;
+  _id: string;
   Instructor_Name: string;
   email: string;
   role: string;
@@ -48,7 +48,7 @@ export default function FilterBar({
         >
           <option value="">All</option>
           {instructors.map((user) => (
-            <option key={user.id} value={user.id}>
+            <option key={user._id} value={user._id}>
               {user.Instructor_Name}
             </option>
           ))}
