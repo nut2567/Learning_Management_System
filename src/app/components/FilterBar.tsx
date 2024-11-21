@@ -1,6 +1,5 @@
-"use client";
 import { GiSettingsKnobs } from "react-icons/gi";
-import { useEffect, useState } from "react";
+
 interface FilterBarProps {
   Instructor: string;
   setInstructor: (value: string) => void;
@@ -10,9 +9,11 @@ interface FilterBarProps {
   setStatus: (value: string) => void;
   Sort: string;
   setSort: (value: string) => void;
+  instructors: User[];
 }
-interface User {
-  _id: string;
+
+export interface User {
+  id: string;
   Instructor_Name: string;
   email: string;
   role: string;
@@ -27,24 +28,12 @@ export default function FilterBar({
   setStatus,
   Sort,
   setSort,
+  instructors,
 }: FilterBarProps) {
-  const [user, setUser] = useState<User[]>([]);
-  useEffect(() => {
-    const getUser = () => {
-      fetch("/api/getInstructor")
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setUser(data.userList);
-        });
-    };
-
-    getUser();
-  }, []);
   return (
     <div
       id="filter"
-      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4  py-4 w-full"
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4  w-full"
     >
       {/* Instructor Filter */}
       <div className="flex flex-col space-y-2">
@@ -58,8 +47,8 @@ export default function FilterBar({
           onChange={(e) => setInstructor(e.target.value)}
         >
           <option value="">All</option>
-          {user.map((user) => (
-            <option key={user._id} value={user._id}>
+          {instructors.map((user) => (
+            <option key={user.id} value={user.id}>
               {user.Instructor_Name}
             </option>
           ))}

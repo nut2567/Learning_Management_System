@@ -10,7 +10,6 @@ export default function Layout({}) {
             alt="Next.js logo"
             width={300}
             height={300}
-            priority
           />
         </div>
         <div className="flex gap-5">
@@ -31,7 +30,6 @@ export default function Layout({}) {
                   alt="Next.js logo"
                   width={90}
                   height={18}
-                  priority
                 />
               </a>
             </div>
