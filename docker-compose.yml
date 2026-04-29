@@ -1,8 +1,18 @@
-version: "3.8"
 services:
+  mongodb:
+    image: mongo:7.0
+    container_name: lms-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: learning_management_system
+    volumes:
+      - mongodb-data:/data/db
+
   typesense:
     image: typesense/typesense:30.1
-    container_name: typesense
+    container_name: lms-typesense
     restart: unless-stopped
     ports:
       - "8108:8108"
@@ -12,3 +22,6 @@ services:
       --data-dir /data
       --api-key=xyz
       --enable-cors
+
+volumes:
+  mongodb-data:

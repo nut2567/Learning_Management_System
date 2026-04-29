@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import daisyui from "daisyui";
 
 export default {
   content: [
@@ -13,11 +14,9 @@ export default {
         foreground: "var(--foreground)",
       },
       screens: {
-        'smb': '350px',
+        smb: "350px",
       },
     },
   },
-  plugins: [
-    require('daisyui'),
-  ],
+  plugins: [daisyui],
 } satisfies Config;

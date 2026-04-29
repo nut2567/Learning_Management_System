@@ -2,6 +2,8 @@ import Home from "@/app/layouts/homepage";
 import { GetProduct } from "@/app/utils/getproduct";
 import GetInstructors from "@/app/utils/getInstructors";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const initialProducts = await GetProduct();
   const initialinstructor = await GetInstructors();

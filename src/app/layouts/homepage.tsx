@@ -1,49 +1,52 @@
 "use client";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import WrapLoading from "@/app/layouts/WrapLoadind";
-import FilterBar, { User } from "@/app/components/FilterBar";
-import ProductList, { Courses } from "@/app/components/ProductList";
+
+import { useEffect, useRef, useState } from "react";
 import ReactPaginate from "react-paginate";
-import { GetProduct } from "@/app/utils/getproduct";
+import FilterBar, { type User } from "@/app/components/FilterBar";
+import ProductList, { type Courses } from "@/app/components/ProductList";
+import WrapLoading from "@/app/layouts/WrapLoadind";
+import {
+  GetProduct,
+  type CourseFilters,
+  type ProductResponse,
+} from "@/app/utils/getproduct";
 import GetInstructors from "@/app/utils/getInstructors";
+
+const PAGE_LIMIT = 9;
 
 export default function Home({
   initialProducts,
   initialinstructor,
 }: {
-  initialProducts: any;
-  initialinstructor: any;
+  initialProducts: ProductResponse;
+  initialinstructor: User[];
 }) {
-  const [product, setProduct] = useState<Courses[]>(initialProducts.product); // ใช้ useState เพื่อจัดเก็บข้อมูล user
+  const [product, setProduct] = useState<Courses[]>(initialProducts.product);
   const [user, setUser] = useState<User[]>(initialinstructor);
-  const [isLoading, setIsLoading] = useState(false); // Tracks loading state
-  const [error, setError] = useState(""); // Tracks errors if they occur
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [Instructor, setInstructor] = useState("");
   const [Status, setStatus] = useState("");
   const [Level, setLevel] = useState("");
   const [Sort, setSort] = useState("");
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(
+    Math.ceil(initialProducts.total / PAGE_LIMIT)
+  );
+  const hasMounted = useRef(false);
 
-  const limit = 9;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialProducts.total / limit);
+  const getFilters = (): CourseFilters => ({ Instructor, Status, Level, Sort });
 
-  const fetchProduct = async (page: number) => {
-    page = page ? page : 1;
+  const fetchProduct = async (pageIndex: number, filters: CourseFilters) => {
     setIsLoading(true);
+    setError("");
+
     try {
-      const filters = { Instructor, Status, Level, Sort };
-      const response = await GetProduct(page, limit, filters);
-      setProduct(response.product || []);
-      if (response.total != 0) {
-        setTotalPages(Math.ceil(response.total / limit));
-      } else {
-        setTotalPages(0);
-      }
+      const response = await GetProduct(pageIndex + 1, PAGE_LIMIT, filters);
+      setProduct(response.product);
+      setTotalPages(Math.ceil(response.total / PAGE_LIMIT));
       setUser(await GetInstructors());
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Failed to load product data");
     } finally {
       setIsLoading(false);
@@ -51,29 +54,20 @@ export default function Home({
   };
 
   useEffect(() => {
-    if (isFirstLoad) {
-      setIsFirstLoad(false); // แก้ไขสถานะหลังจากครั้งแรก
-      return; // หยุดไม่ให้ fetchProduct ทำงานครั้งแรก
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
     }
 
-    // รีเซ็ตหน้าเป็นหน้าแรกเมื่อ Filter เปลี่ยน
-    fetchProduct(1);
+    const nextPage = 0;
+    setCurrentPage(nextPage);
+    fetchProduct(nextPage, getFilters());
   }, [Level, Status, Instructor, Sort]);
 
-  // ทำงานเมื่อ currentPage เปลี่ยน
-  useEffect(() => {
-    if (isFirstLoad) {
-      setIsFirstLoad(false); // แก้ไขสถานะหลังจากครั้งแรก
-      return; // หยุดไม่ให้ fetchProduct ทำงานครั้งแรก
-    }
-
-    fetchProduct(currentPage);
-  }, [currentPage]);
-
   const handlePageChange = (selectedItem: { selected: number }) => {
-    let next = selectedItem.selected;
-    console.log(next);
-    setCurrentPage(next); // อัปเดต currentPage ตามที่เลือกใน ReactPaginate
+    const nextPage = selectedItem.selected;
+    setCurrentPage(nextPage);
+    fetchProduct(nextPage, getFilters());
   };
 
   return (
@@ -82,10 +76,9 @@ export default function Home({
     font-[family-name:var(--font-geist-sans)]"
     >
       <main className="flex flex-col row-start-2 sm:items-start">
-        <h1 className="sm:text-[40px] smb:text-[28px] font-bold text-black ">
+        <h1 className="sm:text-[40px] smb:text-[28px] font-bold text-black">
           Available Courses
         </h1>
-        {/* ใช้ FilterBar */}
         <FilterBar
           Instructor={Instructor}
           setInstructor={setInstructor}
@@ -98,24 +91,27 @@ export default function Home({
           instructors={user}
         />
         {error ? (
-          <p>{error}</p> // แสดง error หากมี
+          <p>{error}</p>
         ) : isLoading ? (
-          <WrapLoading /> // แสดง loading หากกำลังโหลดข้อมูล
+          <WrapLoading />
         ) : (
           <div className="w-full">
             <ProductList products={product} />
-            {/* Pagination */}
             <ReactPaginate
-              // previousLabel={<span>{"<"}</span>}
-              // nextLabel={<span>{">"}</span>}
               previousLabel={
-                <button className="py-2 px-4 border font-bold  rounded-md cursor-pointer hover:bg-gray-300 transition">
+                <button
+                  className="py-2 px-4 border font-bold rounded-md cursor-pointer hover:bg-gray-300 transition"
+                  type="button"
+                >
                   {"<"}
                 </button>
               }
               previousClassName=""
               nextLabel={
-                <button className="py-2 px-4 border font-bold rounded-md cursor-pointer hover:bg-gray-300 transition">
+                <button
+                  className="py-2 px-4 border font-bold rounded-md cursor-pointer hover:bg-gray-300 transition"
+                  type="button"
+                >
                   {">"}
                 </button>
               }
@@ -123,21 +119,23 @@ export default function Home({
               pageLinkClassName="page-button"
               pageLabelBuilder={(page: number) => (
                 <button
-                  className={`py-2 px-4 border font-bold rounded-md
-                    ${
-                      currentPage === page
-                        ? "bg-[##E3EBFF] text-blue-500 border-blue-500"
-                        : " bg-white"
-                    }
-                  `}
+                  className={`py-2 px-4 border font-bold rounded-md ${
+                    currentPage === page - 1
+                      ? "bg-[#E3EBFF] text-blue-500 border-blue-500"
+                      : "bg-white"
+                  }`}
+                  type="button"
                 >
                   {page}
                 </button>
               )}
               pageClassName=""
-              activeClassName={""}
+              activeClassName=""
               breakLabel={
-                <button className="py-2 px-4 border font-bold rounded-md">
+                <button
+                  className="py-2 px-4 border font-bold rounded-md"
+                  type="button"
+                >
                   ...
                 </button>
               }
@@ -146,7 +144,7 @@ export default function Home({
               pageRangeDisplayed={3}
               onPageChange={handlePageChange}
               containerClassName="flex justify-center mt-8 space-x-2"
-              forcePage={currentPage} // เพิ่ม forcePage เพื่อให้ sync กับ currentPage
+              forcePage={currentPage}
               pageCount={totalPages}
             />
           </div>

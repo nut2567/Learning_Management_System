@@ -1,14 +1,11 @@
 
 import { connectMongoDB } from '@lib/mongodb';
 import {User} from '@models/schema';
-import mongoose from 'mongoose';
 import { NextResponse,NextRequest } from 'next/server';
 
-if (mongoose.connection.readyState === 0) {
-  connectMongoDB();
-}
-
   export async function POST(req: NextRequest) {
+    await connectMongoDB();
+
       
     const {
       Instructor_Name ,

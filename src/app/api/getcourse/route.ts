@@ -1,28 +1,77 @@
 import { connectMongoDB } from "@lib/mongodb";
 import Courses from "@models/schema";
+import { Types } from "mongoose";
 import { NextResponse } from "next/server";
-import mongoose, { Types } from "mongoose";
 
-// เชื่อมต่อ MongoDB
-if (mongoose.connection.readyState === 0) {
-  connectMongoDB();
-}
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 9;
+
+type CourseQuery = {
+  userId?: Types.ObjectId;
+  Status?: string;
+  Level?: string;
+};
+
+type SortOption = Record<string, 1 | -1>;
+
+const toPositiveInteger = (value: string | null, fallback: number) => {
+  const parsedValue = Number(value);
+  if (!Number.isInteger(parsedValue) || parsedValue < 1) {
+    return fallback;
+  }
+
+  return parsedValue;
+};
+
+const getSortOption = (sort: string): SortOption => {
+  if (sort === "A-Z") {
+    return { Course_Title: 1 };
+  }
+
+  if (sort === "Z-A") {
+    return { Course_Title: -1 };
+  }
+
+  if (sort === "countHigh") {
+    return { Enrollment_Count: -1 };
+  }
+
+  if (sort === "countLow") {
+    return { Enrollment_Count: 1 };
+  }
+
+  if (sort === "durationHigh") {
+    return { Course_Duration: -1 };
+  }
+
+  if (sort === "durationLow") {
+    return { Course_Duration: 1 };
+  }
+
+  return {};
+};
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  await connectMongoDB();
 
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "9");
+  const { searchParams } = new URL(request.url);
+  const page = toPositiveInteger(searchParams.get("page"), DEFAULT_PAGE);
+  const limit = toPositiveInteger(searchParams.get("limit"), DEFAULT_LIMIT);
   const Instructor = searchParams.get("Instructor") || "";
   const Status = searchParams.get("Status") || "";
   const Level = searchParams.get("Level") || "";
   const Sort = searchParams.get("Sort") || "";
-
-  const query: any = {};
+  const query: CourseQuery = {};
 
   if (Instructor) {
-    const userObjectId = new Types.ObjectId(Instructor);
-    query.userId = userObjectId;
+    if (!Types.ObjectId.isValid(Instructor)) {
+      return NextResponse.json(
+        { message: "Instructor is not a valid ObjectId" },
+        { status: 400 }
+      );
+    }
+
+    query.userId = new Types.ObjectId(Instructor);
   }
 
   if (Status) {
@@ -33,58 +82,28 @@ export async function GET(request: Request) {
     query.Level = Level;
   }
 
-  let sortOption = {};
-  let product;
-
-  if (Sort === "A-Z") {
-    sortOption = { Course_Title: 1 };
-  } else if (Sort === "Z-A") {
-    sortOption = { Course_Title: -1 };
-  } else if (Sort === "countHigh") {
-    sortOption = { Enrollment_Count: -1 };
-  } else if (Sort === "countLow") {
-    sortOption = { Enrollment_Count: 1 };
-  } else if (Sort === "durationHigh") {
-    sortOption = { Course_Duration: -1 };
-  } else if (Sort === "durationLow") {
-    sortOption = { Course_Duration: 1 };
-  } else {
-    sortOption = "random";
-  }
-
   try {
     const skip = (page - 1) * limit;
-
-    // if (sortOption === "random") {
-    //   product = await Courses.aggregate([
-    //     { $match: query },
-    //     { $sample: { size: limit } }
-    //   ]);
-    // } else {
-    product = await Courses.find(query)
-      .sort(sortOption)
+    const product = await Courses.find(query)
+      .sort(getSortOption(Sort))
       .collation({ locale: "en", strength: 2 })
       .skip(skip)
       .limit(limit);
-    // }
 
-    product = await Courses.populate(product, {
-      path: 'userId',
-      select: 'Instructor_Name email image phone'
+    const populatedProduct = await Courses.populate(product, {
+      path: "userId",
+      select: "Instructor_Name email image phone",
     });
-
     const total = await Courses.countDocuments(query);
 
     return NextResponse.json(
-      { message: "Success get List", product, total },
+      { message: "Success get List", product: populatedProduct, total },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error fetching courses:", error);
     return NextResponse.json(
       { message: "Failed to fetch data", error },
       { status: 500 }
     );
   }
 }
-

@@ -3,11 +3,9 @@ import Courses from '@models/schema';
 import mongoose, { Types } from 'mongoose';
 import { NextResponse, NextRequest } from 'next/server';
 
-if (mongoose.connection.readyState === 0) {
-  connectMongoDB();
-}
-
 export async function POST(req: NextRequest) {
+  await connectMongoDB();
+
   try {
     const {
       Course_Title,
@@ -29,7 +27,6 @@ export async function POST(req: NextRequest) {
     }
 
     const userObjectId = new Types.ObjectId(userId);
-    console.log(userObjectId, userId)
 
 
     // ตรวจสอบว่ามี Course_Title สำหรับ userId นี้อยู่แล้วหรือไม่

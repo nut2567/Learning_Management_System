@@ -4,12 +4,9 @@ import { connectMongoDB } from '@lib/mongodb';
 import Courses from '@models/schema';
 
 // เชื่อมต่อกับ MongoDB ก่อนที่จะเรียกใช้ API
-if (mongoose.connection.readyState === 0) {
-  connectMongoDB();
-}
-
-
 export async function GET(req: NextRequest) {
+  await connectMongoDB();
+
   const id = req.nextUrl.pathname.split("/").pop(); // ดึง ID จาก URL
 
   if (!id) {
@@ -34,6 +31,8 @@ export async function GET(req: NextRequest) {
 
 
 export async function POST(req: NextRequest) {
+  await connectMongoDB();
+
   const id = req.nextUrl.pathname.split("/").pop(); // ดึง ID จาก URL
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {

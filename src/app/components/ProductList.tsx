@@ -8,16 +8,16 @@ export interface Courses {
   _id: string;
   Course_Title: string;
   userId: {
-    Instructor_Name: String;
-    age: Number;
-    email: String;
+    Instructor_Name: string;
+    age: number;
+    email: string;
     createdAt: Date;
     image: string;
-    phone: String;
+    phone: string;
   };
   Course_Duration: number;
   Level: string;
-  Enrollment_Count: Number;
+  Enrollment_Count: number;
   createdAt: Date;
   Status: string;
   image: string;
@@ -27,15 +27,13 @@ interface ProductListProps {
   products: Courses[];
 }
 
-export default function ProductList({ products }: ProductListProps) {
-  const durationTime = (duration: number) => {
-    const hours = Math.floor(duration); // แยกส่วนชั่วโมง
-    const minutes = Math.round((duration - hours) * 100); // แปลงส่วนทศนิยมเป็นนาที
-    let text = `${hours} hr ${minutes} mins`;
-    // console.log(text);
-    return text;
-  };
+const durationTime = (duration: number) => {
+  const hours = Math.floor(duration);
+  const minutes = Math.round((duration - hours) * 100);
+  return `${hours} hr ${minutes} mins`;
+};
 
+export default function ProductList({ products }: ProductListProps) {
   return (
     <div className="grid smb:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-12 w-full">
       {products.map((item) => (
@@ -44,10 +42,10 @@ export default function ProductList({ products }: ProductListProps) {
           key={item._id}
         >
           <figure>
-            <div className="relative h-[222px] w-[100%]">
+            <div className="relative h-[222px] w-full">
               <Image
                 src={item.image}
-                alt={item.Course_Title || "Product Image"}
+                alt={item.Course_Title || "Course cover"}
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -57,7 +55,6 @@ export default function ProductList({ products }: ProductListProps) {
           </figure>
 
           <div className="py-5 border-b-2 mb-4 space-y-2">
-            {/* <h2 className="card-title">ID: {item._id}</h2> */}
             <div className="space-x-2">
               <BtnLevel Level={item.Level} />
               <BtnStatus Status={item.Status} />
@@ -65,14 +62,14 @@ export default function ProductList({ products }: ProductListProps) {
             <h2 className="card-title text-black">{item.Course_Title}</h2>
             <div className="flex justify-items-center items-center gap-2">
               <figure>
-                <div className="relative h-[28px] w-[28px] ">
+                <div className="relative h-[28px] w-[28px]">
                   <Image
                     className="rounded-full"
                     src={item.userId.image}
-                    alt={"Instructor_Name Image"}
+                    alt={item.userId.Instructor_Name}
                     fill
                     priority
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    sizes="28px"
                     style={{ objectFit: "cover" }}
                   />
                 </div>
@@ -87,7 +84,7 @@ export default function ProductList({ products }: ProductListProps) {
             </div>
             <div className="flex justify-items-center items-center gap-2">
               <MdPeople />
-              <p>{`${item.Enrollment_Count.toLocaleString("th-TH")}`}</p>
+              <p>{item.Enrollment_Count.toLocaleString("th-TH")}</p>
             </div>
           </div>
         </div>

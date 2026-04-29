@@ -1,47 +1,71 @@
 import axios from "axios";
-import ProductList, { Courses } from "@/app/components/ProductList";
+import type { Courses } from "@/app/components/ProductList";
+
+export type CourseFilters = {
+  Instructor: string;
+  Status: string;
+  Level: string;
+  Sort: string;
+};
+
+export type ProductResponse = {
+  product: Courses[];
+  total: number;
+};
+
+const DEFAULT_PRODUCTS_RESPONSE: ProductResponse = {
+  product: [],
+  total: 0,
+};
+
+const getApiBaseUrl = () =>
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4400";
+
+const getCourseParams = (
+  page: number,
+  limit: number,
+  filters: CourseFilters
+) => {
+  const params: Record<string, string | number> = { page, limit };
+
+  if (filters.Instructor) {
+    params.Instructor = filters.Instructor;
+  }
+
+  if (filters.Status) {
+    params.Status = filters.Status;
+  }
+
+  if (filters.Level) {
+    params.Level = filters.Level;
+  }
+
+  if (filters.Sort) {
+    params.Sort = filters.Sort;
+  }
+
+  return params;
+};
+
 export async function GetProduct(
   page = 1,
   limit = 9,
-  filters = { Instructor: "", Status: "", Level: "", Sort: "" }
-) {
+  filters: CourseFilters = { Instructor: "", Status: "", Level: "", Sort: "" }
+): Promise<ProductResponse> {
   try {
-    // ดึงค่าจาก filters
-    const { Instructor, Status, Level, Sort } = filters;
+    const { data } = await axios.get<ProductResponse>(
+      `${getApiBaseUrl()}/api/getcourse`,
+      {
+        params: getCourseParams(page, limit, filters),
+      }
+    );
 
-    // สร้าง params object สำหรับ axios
-    const params: any = { page, limit };
-
-    // เพิ่มค่าที่ไม่ว่างลงใน params
-    if (Instructor) params.Instructor = Instructor;
-    if (Status) params.Status = Status;
-    if (Level) params.Level = Level;
-    if (Sort) params.Sort = Sort;
-
-    const baseURL =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4400";
-    const { data } = await axios.get(`${baseURL}/api/getcourse`, { params });
-    // ทำการเรียก API
-    console.log(data);
-    // ตรวจสอบและส่งข้อมูลที่ได้รับ
-    if (data && data.product) {
-      return data; // Return data from response
-    } else {
-      return { product: [], total: 0 }; // Return empty data if no products
+    if (Array.isArray(data.product)) {
+      return data;
     }
-  } catch (error) {
-    console.error("Failed to fetch products:", error);
-    return { product: [], total: 0 };
+
+    return DEFAULT_PRODUCTS_RESPONSE;
+  } catch {
+    return DEFAULT_PRODUCTS_RESPONSE;
   }
-}
-
-export default async function CoursesSSR() {
-  const data = await GetProduct(); // ดึงข้อมูลจาก API
-
-  return (
-    <div className="min-h-screen p-8 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-4">Available Courses</h1>
-      <ProductList products={data.courses || []} />
-    </div>
-  );
 }

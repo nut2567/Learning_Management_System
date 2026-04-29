@@ -1,13 +1,10 @@
 import { connectMongoDB } from "@lib/mongodb";
 import Courses from "@models/schema";
-import mongoose from "mongoose";
 import { NextResponse, NextRequest } from "next/server";
 
-if (mongoose.connection.readyState === 0) {
-  connectMongoDB();
-}
-
 export async function DELETE(req: NextRequest) {
+  await connectMongoDB();
+
   const id = req.nextUrl.searchParams.get("id");
 
   if (!id) {

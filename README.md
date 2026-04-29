@@ -1,40 +1,78 @@
-<<<<<<< HEAD
-# Learning_Management_System
-=======
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Learning Management System
 
-## Getting Started
+Next.js LMS project backed by MongoDB through Mongoose and Typesense for course search indexing.
 
-First, run the development server:
+## Local Services
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Start MongoDB and Typesense with Docker Compose:
+
+```powershell
+docker compose up -d
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The default local service URLs are:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+MongoDB: mongodb://127.0.0.1:27017/learning_management_system
+Typesense: http://127.0.0.1:8108
+Typesense API key: xyz
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+You can override them with environment variables:
 
-## Learn More
+```text
+MONGODB_URI
+TYPESENSE_HOST
+TYPESENSE_API_KEY
+TYPESENSE_COURSES_COLLECTION
+```
 
-To learn more about Next.js, take a look at the following resources:
+## App
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run the Next.js app:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+npm run dev
+```
 
-## Deploy on Vercel
+Open:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+http://localhost:4400
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
->>>>>>> 5d9c20c (Initial commit from Create Next App)
+## Seed Data
+
+Seed MongoDB and index all courses into Typesense:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:4400/api/seed?reset=true" -Method Post
+```
+
+The seed route also accepts a JSON body:
+
+```json
+{
+  "reset": true,
+  "instructors": [
+    {
+      "Instructor_Name": "Ariya Wong",
+      "age": 34,
+      "email": "ariya.wong@example.com",
+      "image": "/bukky.jpg",
+      "phone": "081-234-5678"
+    }
+  ],
+  "courses": [
+    {
+      "Course_Title": "Next.js Foundations",
+      "instructorName": "Ariya Wong",
+      "Course_Duration": 6.3,
+      "Level": "Beginner",
+      "Enrollment_Count": 1480,
+      "Status": "Open",
+      "image": "/16_9.png"
+    }
+  ]
+}
+```
