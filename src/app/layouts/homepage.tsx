@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import ReactPaginate from "react-paginate";
+import { SearchIcon } from "lucide-react";
 import FilterBar, { type User } from "@/app/components/FilterBar";
 import ProductList, { type Courses } from "@/app/components/ProductList";
 import WrapLoading from "@/app/layouts/WrapLoadind";
@@ -29,13 +30,21 @@ export default function Home({
   const [Status, setStatus] = useState("");
   const [Level, setLevel] = useState("");
   const [Sort, setSort] = useState("");
+  const [Search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(
     Math.ceil(initialProducts.total / PAGE_LIMIT)
   );
   const hasMounted = useRef(false);
+  const deferredSearch = useDeferredValue(Search.trim());
 
-  const getFilters = (): CourseFilters => ({ Instructor, Status, Level, Sort });
+  const getFilters = (): CourseFilters => ({
+    Instructor,
+    Status,
+    Level,
+    Sort,
+    Search: deferredSearch,
+  });
 
   const fetchProduct = async (pageIndex: number, filters: CourseFilters) => {
     setIsLoading(true);
@@ -62,7 +71,7 @@ export default function Home({
     const nextPage = 0;
     setCurrentPage(nextPage);
     fetchProduct(nextPage, getFilters());
-  }, [Level, Status, Instructor, Sort]);
+  }, [Level, Status, Instructor, Sort, deferredSearch]);
 
   const handlePageChange = (selectedItem: { selected: number }) => {
     const nextPage = selectedItem.selected;
@@ -79,6 +88,25 @@ export default function Home({
         <h1 className="sm:text-[40px] smb:text-[28px] font-bold text-black">
           Available Courses
         </h1>
+        <div className="w-full mb-6">
+          <label htmlFor="course-search" className="block font-medium mb-2">
+            Search courses
+          </label>
+          <div className="relative">
+            <SearchIcon
+              aria-hidden="true"
+              className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500"
+            />
+            <input
+              id="course-search"
+              type="search"
+              value={Search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by course, instructor, level, or status"
+              className="w-full rounded-md border bg-white py-3 pl-10 pr-4 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+        </div>
         <FilterBar
           Instructor={Instructor}
           setInstructor={setInstructor}

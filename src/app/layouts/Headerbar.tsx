@@ -21,12 +21,17 @@ export default function Layout({}) {
           <div className="flex justify-center items-center w-full">
             {" "}
             powered by
-            <div className=" mx-5">
-              <a href="https://nextjs.org/" target="_blank" rel="noreferrer">
+            <div className=" mx-auto">
+              <a
+                href="https://nextjs.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="relative aspect-video min-h-4"
+              >
                 {/* <NextLogo /> */}
                 <Image
                   className="dark"
-                  src="https://nextjs.org/icons/next.svg"
+                  src="/nextjs-logo.webp"
                   alt="Next.js logo"
                   width={90}
                   height={18}

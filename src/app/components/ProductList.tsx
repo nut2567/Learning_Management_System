@@ -8,10 +8,9 @@ export interface Courses {
   _id: string;
   Course_Title: string;
   userId: {
+    _id: string;
     Instructor_Name: string;
-    age: number;
     email: string;
-    createdAt: Date;
     image: string;
     phone: string;
   };

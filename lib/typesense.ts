@@ -40,6 +40,40 @@ type TypesenseImportLine = {
   error?: string;
 };
 
+type TypesenseSearchHit = {
+  document: CourseSearchDocument;
+};
+
+type TypesenseSearchResponse = {
+  found: number;
+  hits?: TypesenseSearchHit[];
+};
+
+export type CourseSearchFilters = {
+  Instructor?: string;
+  Status?: string;
+  Level?: string;
+  Sort?: string;
+};
+
+export type CourseSearchProduct = {
+  _id: string;
+  Course_Title: string;
+  Course_Duration: number;
+  Level: string;
+  Enrollment_Count: number;
+  createdAt: string;
+  Status: string;
+  image: string;
+  userId: {
+    _id: string;
+    Instructor_Name: string;
+    email: string;
+    image: string;
+    phone: string;
+  };
+};
+
 const coursesCollectionSchema: TypesenseCollectionSchema = {
   name: TYPESENSE_COURSES_COLLECTION,
   fields: [
@@ -141,6 +175,66 @@ export async function ensureCoursesCollection(options = { recreate: false }) {
 const parseImportLine = (line: string): TypesenseImportLine =>
   JSON.parse(line) as TypesenseImportLine;
 
+const getTypesenseSortBy = (sort = "") => {
+  if (sort === "countHigh") {
+    return "enrollmentCount:desc";
+  }
+
+  if (sort === "countLow") {
+    return "enrollmentCount:asc";
+  }
+
+  if (sort === "durationHigh") {
+    return "courseDuration:desc";
+  }
+
+  if (sort === "durationLow") {
+    return "courseDuration:asc";
+  }
+
+  return "";
+};
+
+const escapeFilterValue = (value: string) => `\`${value.replace(/`/g, "\\`")}\``;
+
+const buildSearchFilterBy = (filters: CourseSearchFilters) => {
+  const filterParts: string[] = [];
+
+  if (filters.Instructor) {
+    filterParts.push(`instructorId:=${escapeFilterValue(filters.Instructor)}`);
+  }
+
+  if (filters.Status) {
+    filterParts.push(`status:=${escapeFilterValue(filters.Status)}`);
+  }
+
+  if (filters.Level) {
+    filterParts.push(`level:=${escapeFilterValue(filters.Level)}`);
+  }
+
+  return filterParts.join(" && ");
+};
+
+const toCourseProduct = (
+  document: CourseSearchDocument
+): CourseSearchProduct => ({
+  _id: document.id,
+  Course_Title: document.courseTitle,
+  Course_Duration: document.courseDuration,
+  Level: document.level,
+  Enrollment_Count: document.enrollmentCount,
+  createdAt: new Date(document.createdAt).toISOString(),
+  Status: document.status,
+  image: document.image,
+  userId: {
+    _id: document.instructorId,
+    Instructor_Name: document.instructorName,
+    email: document.instructorEmail,
+    image: document.instructorImage,
+    phone: document.instructorPhone,
+  },
+});
+
 export async function importCoursesToTypesense(
   documents: CourseSearchDocument[]
 ) {
@@ -170,4 +264,43 @@ export async function importCoursesToTypesense(
   }
 
   return { imported: results.length };
+}
+
+export async function searchCoursesInTypesense({
+  query,
+  page,
+  limit,
+  filters,
+}: {
+  query: string;
+  page: number;
+  limit: number;
+  filters: CourseSearchFilters;
+}) {
+  const params = new URLSearchParams({
+    q: query,
+    query_by: "courseTitle,instructorName,level,status",
+    page: String(page),
+    per_page: String(limit),
+  });
+  const filterBy = buildSearchFilterBy(filters);
+  const sortBy = getTypesenseSortBy(filters.Sort);
+
+  if (filterBy) {
+    params.set("filter_by", filterBy);
+  }
+
+  if (sortBy) {
+    params.set("sort_by", sortBy);
+  }
+
+  const response = await typesenseFetch(
+    `/collections/${TYPESENSE_COURSES_COLLECTION}/documents/search?${params.toString()}`
+  );
+  const data = (await response.json()) as TypesenseSearchResponse;
+
+  return {
+    product: (data.hits ?? []).map((hit) => toCourseProduct(hit.document)),
+    total: data.found,
+  };
 }

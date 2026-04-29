@@ -6,6 +6,7 @@ export type CourseFilters = {
   Status: string;
   Level: string;
   Sort: string;
+  Search: string;
 };
 
 export type ProductResponse = {
@@ -44,13 +45,23 @@ const getCourseParams = (
     params.Sort = filters.Sort;
   }
 
+  if (filters.Search) {
+    params.Search = filters.Search;
+  }
+
   return params;
 };
 
 export async function GetProduct(
   page = 1,
   limit = 9,
-  filters: CourseFilters = { Instructor: "", Status: "", Level: "", Sort: "" }
+  filters: CourseFilters = {
+    Instructor: "",
+    Status: "",
+    Level: "",
+    Sort: "",
+    Search: "",
+  }
 ): Promise<ProductResponse> {
   try {
     const { data } = await axios.get<ProductResponse>(

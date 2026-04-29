@@ -1,4 +1,5 @@
 import { connectMongoDB } from "@lib/mongodb";
+import { searchCoursesInTypesense } from "@lib/typesense";
 import Courses from "@models/schema";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
@@ -52,8 +53,6 @@ const getSortOption = (sort: string): SortOption => {
 };
 
 export async function GET(request: Request) {
-  await connectMongoDB();
-
   const { searchParams } = new URL(request.url);
   const page = toPositiveInteger(searchParams.get("page"), DEFAULT_PAGE);
   const limit = toPositiveInteger(searchParams.get("limit"), DEFAULT_LIMIT);
@@ -61,6 +60,7 @@ export async function GET(request: Request) {
   const Status = searchParams.get("Status") || "";
   const Level = searchParams.get("Level") || "";
   const Sort = searchParams.get("Sort") || "";
+  const Search = searchParams.get("Search")?.trim() ?? "";
   const query: CourseQuery = {};
 
   if (Instructor) {
@@ -83,6 +83,26 @@ export async function GET(request: Request) {
   }
 
   try {
+    if (Search) {
+      const searchResult = await searchCoursesInTypesense({
+        query: Search,
+        page,
+        limit,
+        filters: { Instructor, Status, Level, Sort },
+      });
+
+      return NextResponse.json(
+        {
+          message: "Success search List",
+          product: searchResult.product,
+          total: searchResult.total,
+        },
+        { status: 200 }
+      );
+    }
+
+    await connectMongoDB();
+
     const skip = (page - 1) * limit;
     const product = await Courses.find(query)
       .sort(getSortOption(Sort))
