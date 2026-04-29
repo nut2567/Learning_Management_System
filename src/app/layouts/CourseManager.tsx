@@ -87,7 +87,16 @@ export default function CourseManager() {
             <tbody>
               {courses.map((course) => (
                 <tr key={course._id}>
-                  <td>{course.Course_Title}</td>
+                  <td>
+                    <div className="font-medium text-gray-900">
+                      {course.Course_Title}
+                    </div>
+                    {course.Course_Title_TH ? (
+                      <div className="text-sm text-gray-500">
+                        {course.Course_Title_TH}
+                      </div>
+                    ) : null}
+                  </td>
                   <td>{course.userId.Instructor_Name}</td>
                   <td>{course.Level}</td>
                   <td>{course.Status}</td>

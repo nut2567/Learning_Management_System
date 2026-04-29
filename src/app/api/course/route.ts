@@ -6,6 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 type CoursePayload = {
   Course_Title?: string;
+  Course_Title_TH?: string;
   image?: string;
   userId?: string;
   Course_Duration?: number;
@@ -14,7 +15,19 @@ type CoursePayload = {
   Status?: string;
 };
 
-type CompleteCoursePayload = Required<CoursePayload>;
+type CompleteCoursePayload = CoursePayload &
+  Required<
+    Pick<
+      CoursePayload,
+      | "Course_Title"
+      | "image"
+      | "userId"
+      | "Course_Duration"
+      | "Level"
+      | "Enrollment_Count"
+      | "Status"
+    >
+  >;
 
 const isValidCoursePayload = (
   payload: CoursePayload
@@ -65,6 +78,7 @@ export async function POST(req: NextRequest) {
 
     const newCourse = await Courses.create({
       Course_Title: payload.Course_Title,
+      Course_Title_TH: payload.Course_Title_TH?.trim() ?? "",
       image: payload.image,
       userId: userObjectId,
       Course_Duration: payload.Course_Duration,

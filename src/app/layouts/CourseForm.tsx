@@ -9,6 +9,7 @@ import type { User } from "@/app/components/FilterBar";
 
 type CourseFormState = {
   Course_Title: string;
+  Course_Title_TH: string;
   userId: string;
   Course_Duration: number;
   Level: string;
@@ -19,6 +20,7 @@ type CourseFormState = {
 
 const EMPTY_COURSE: CourseFormState = {
   Course_Title: "",
+  Course_Title_TH: "",
   userId: "",
   Course_Duration: 0,
   Level: "",
@@ -29,10 +31,19 @@ const EMPTY_COURSE: CourseFormState = {
 
 const COURSE_FIELDS = [
   "Course_Title",
+  "Course_Title_TH",
   "Course_Duration",
   "Enrollment_Count",
   "image",
 ] as const;
+
+const COURSE_FIELD_LABELS: Record<(typeof COURSE_FIELDS)[number], string> = {
+  Course_Title: "Course title",
+  Course_Title_TH: "Thai course title",
+  Course_Duration: "Duration",
+  Enrollment_Count: "Enrollment count",
+  image: "Image",
+};
 
 const LEVEL_OPTIONS = ["Beginner", "Intermediate", "Advanced"] as const;
 const STATUS_OPTIONS = ["Open", "Closed"] as const;
@@ -74,6 +85,7 @@ export default function CourseForm() {
 
           setCourseData({
             Course_Title: data.Course_Title ?? "",
+            Course_Title_TH: data.Course_Title_TH ?? "",
             userId: data.userId?.toString() ?? "",
             Course_Duration: Number(data.Course_Duration ?? 0),
             Level: data.Level ?? "",
@@ -211,11 +223,13 @@ export default function CourseForm() {
             {COURSE_FIELDS.map((field) => (
               <div key={field} className="xl:flex gap-3">
                 <label htmlFor={`input-${field}`} className="w-1/5">
-                  {field}
+                  {COURSE_FIELD_LABELS[field]}
                 </label>
                 <input
                   className={`border-2 p-2 w-full rounded ${
-                    !valid && !courseData[field]
+                    !valid &&
+                    !courseData[field] &&
+                    field !== "Course_Title_TH"
                       ? "border-red-500"
                       : "border-gray-300"
                   }`}
@@ -229,7 +243,7 @@ export default function CourseForm() {
                         : event.target.value
                     )
                   }
-                  placeholder={field}
+                  placeholder={COURSE_FIELD_LABELS[field]}
                   type={
                     field === "Course_Duration" || field === "Enrollment_Count"
                       ? "number"

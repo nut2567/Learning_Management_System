@@ -17,6 +17,7 @@ export { User };
 
 const Courses_Schema = new Schema({
     Course_Title: String,
+    Course_Title_TH: String,
     Course_Duration: Number,
     Level : String,
     Enrollment_Count: Number,

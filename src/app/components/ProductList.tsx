@@ -7,6 +7,7 @@ import BtnStatus from "@/app/components/StatusBtn";
 export interface Courses {
   _id: string;
   Course_Title: string;
+  Course_Title_TH?: string;
   userId: {
     _id: string;
     Instructor_Name: string;
@@ -59,6 +60,9 @@ export default function ProductList({ products }: ProductListProps) {
               <BtnStatus Status={item.Status} />
             </div>
             <h2 className="card-title text-black">{item.Course_Title}</h2>
+            {item.Course_Title_TH ? (
+              <p className="text-sm text-gray-500">{item.Course_Title_TH}</p>
+            ) : null}
             <div className="flex justify-items-center items-center gap-2">
               <figure>
                 <div className="relative h-[28px] w-[28px]">

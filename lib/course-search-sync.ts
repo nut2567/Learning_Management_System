@@ -21,6 +21,7 @@ type StoredInstructor = {
 type StoredCourse = {
   _id: ObjectIdLike;
   Course_Title: string;
+  Course_Title_TH?: string;
   Course_Duration: number;
   Level: string;
   Enrollment_Count: number;
@@ -44,6 +45,7 @@ export const buildCourseSearchDocument = (
 ): CourseSearchDocument => ({
   id: course._id.toString(),
   courseTitle: course.Course_Title,
+  courseTitleTh: course.Course_Title_TH ?? "",
   courseDuration: course.Course_Duration,
   level: course.Level,
   enrollmentCount: course.Enrollment_Count,

@@ -14,9 +14,28 @@ export type ProductResponse = {
   total: number;
 };
 
+export type CourseSuggestion = {
+  id: string;
+  title: string;
+  titleTh: string;
+  instructorName: string;
+  level: string;
+  status: string;
+  image: string;
+  enrollmentCount: number;
+};
+
+export type CourseSuggestionResponse = {
+  suggestions: CourseSuggestion[];
+};
+
 const DEFAULT_PRODUCTS_RESPONSE: ProductResponse = {
   product: [],
   total: 0,
+};
+
+const DEFAULT_SUGGESTIONS_RESPONSE: CourseSuggestionResponse = {
+  suggestions: [],
 };
 
 const getApiBaseUrl = () =>
@@ -78,5 +97,31 @@ export async function GetProduct(
     return DEFAULT_PRODUCTS_RESPONSE;
   } catch {
     return DEFAULT_PRODUCTS_RESPONSE;
+  }
+}
+
+export async function GetCourseSuggestions(
+  filters: CourseFilters,
+  limit = 6
+): Promise<CourseSuggestionResponse> {
+  if (!filters.Search.trim()) {
+    return DEFAULT_SUGGESTIONS_RESPONSE;
+  }
+
+  try {
+    const { data } = await axios.get<CourseSuggestionResponse>(
+      `${getApiBaseUrl()}/api/course-autocomplete`,
+      {
+        params: getCourseParams(1, limit, filters),
+      }
+    );
+
+    if (Array.isArray(data.suggestions)) {
+      return data;
+    }
+
+    return DEFAULT_SUGGESTIONS_RESPONSE;
+  } catch {
+    return DEFAULT_SUGGESTIONS_RESPONSE;
   }
 }

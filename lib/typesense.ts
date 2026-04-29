@@ -9,6 +9,7 @@ export const TYPESENSE_COURSES_COLLECTION =
 export type CourseSearchDocument = {
   id: string;
   courseTitle: string;
+  courseTitleTh: string;
   courseDuration: number;
   level: string;
   enrollmentCount: number;
@@ -59,6 +60,7 @@ export type CourseSearchFilters = {
 export type CourseSearchProduct = {
   _id: string;
   Course_Title: string;
+  Course_Title_TH: string;
   Course_Duration: number;
   Level: string;
   Enrollment_Count: number;
@@ -74,10 +76,22 @@ export type CourseSearchProduct = {
   };
 };
 
+export type CourseAutocompleteSuggestion = {
+  id: string;
+  title: string;
+  titleTh: string;
+  instructorName: string;
+  level: string;
+  status: string;
+  image: string;
+  enrollmentCount: number;
+};
+
 const coursesCollectionSchema: TypesenseCollectionSchema = {
   name: TYPESENSE_COURSES_COLLECTION,
   fields: [
     { name: "courseTitle", type: "string" },
+    { name: "courseTitleTh", type: "string" },
     { name: "courseDuration", type: "float", sort: true },
     { name: "level", type: "string", facet: true },
     { name: "enrollmentCount", type: "int32", sort: true },
@@ -220,6 +234,7 @@ const toCourseProduct = (
 ): CourseSearchProduct => ({
   _id: document.id,
   Course_Title: document.courseTitle,
+  Course_Title_TH: document.courseTitleTh,
   Course_Duration: document.courseDuration,
   Level: document.level,
   Enrollment_Count: document.enrollmentCount,
@@ -233,6 +248,19 @@ const toCourseProduct = (
     image: document.instructorImage,
     phone: document.instructorPhone,
   },
+});
+
+const toCourseAutocompleteSuggestion = (
+  document: CourseSearchDocument
+): CourseAutocompleteSuggestion => ({
+  id: document.id,
+  title: document.courseTitle,
+  titleTh: document.courseTitleTh,
+  instructorName: document.instructorName,
+  level: document.level,
+  status: document.status,
+  image: document.image,
+  enrollmentCount: document.enrollmentCount,
 });
 
 export async function importCoursesToTypesense(
@@ -293,6 +321,44 @@ export async function deleteCourseFromTypesense(documentId: string) {
   return { deleted: true };
 }
 
+export async function getCourseAutocompleteSuggestions({
+  query,
+  limit,
+  filters,
+}: {
+  query: string;
+  limit: number;
+  filters: CourseSearchFilters;
+}) {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  const params = new URLSearchParams({
+    q: trimmedQuery,
+    query_by: "courseTitle,courseTitleTh,instructorName,level,status",
+    page: "1",
+    per_page: String(limit),
+    prefix: "true",
+  });
+  const filterBy = buildSearchFilterBy(filters);
+
+  if (filterBy) {
+    params.set("filter_by", filterBy);
+  }
+
+  const response = await typesenseFetch(
+    `/collections/${TYPESENSE_COURSES_COLLECTION}/documents/search?${params.toString()}`
+  );
+  const data = (await response.json()) as TypesenseSearchResponse;
+
+  return (data.hits ?? []).map((hit) =>
+    toCourseAutocompleteSuggestion(hit.document)
+  );
+}
+
 export async function searchCoursesInTypesense({
   query,
   page,
@@ -306,7 +372,7 @@ export async function searchCoursesInTypesense({
 }) {
   const params = new URLSearchParams({
     q: query,
-    query_by: "courseTitle,instructorName,level,status",
+    query_by: "courseTitle,courseTitleTh,instructorName,level,status",
     page: String(page),
     per_page: String(limit),
   });
