@@ -41,6 +41,14 @@ Open:
 http://localhost:4400
 ```
 
+Manage courses:
+
+```text
+http://localhost:4400/manage
+```
+
+Creating, updating, or deleting courses through the app writes to MongoDB and immediately syncs the related course document in Typesense.
+
 ## Seed Data
 
 Seed MongoDB and index all courses into Typesense:

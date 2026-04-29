@@ -266,6 +266,33 @@ export async function importCoursesToTypesense(
   return { imported: results.length };
 }
 
+export async function deleteCourseFromTypesense(documentId: string) {
+  const response = await fetch(
+    getTypesenseUrl(
+      `/collections/${TYPESENSE_COURSES_COLLECTION}/documents/${documentId}`
+    ),
+    {
+      method: "DELETE",
+      headers: {
+        "X-TYPESENSE-API-KEY": getTypesenseApiKey(),
+      },
+    }
+  );
+
+  if (response.status === HTTP_NOT_FOUND) {
+    return { deleted: false };
+  }
+
+  if (!response.ok) {
+    const preview = await readErrorPreview(response);
+    throw new Error(
+      `Typesense document delete failed (${response.status}): ${preview}`
+    );
+  }
+
+  return { deleted: true };
+}
+
 export async function searchCoursesInTypesense({
   query,
   page,

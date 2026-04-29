@@ -1,67 +1,90 @@
-import { connectMongoDB } from '@lib/mongodb';
-import Courses from '@models/schema';
-import mongoose, { Types } from 'mongoose';
-import { NextResponse, NextRequest } from 'next/server';
+import { syncCourseToTypesense } from "@lib/course-search-sync";
+import { connectMongoDB } from "@lib/mongodb";
+import Courses from "@models/schema";
+import { Types } from "mongoose";
+import { NextResponse, type NextRequest } from "next/server";
+
+type CoursePayload = {
+  Course_Title?: string;
+  image?: string;
+  userId?: string;
+  Course_Duration?: number;
+  Level?: string;
+  Enrollment_Count?: number;
+  Status?: string;
+};
+
+type CompleteCoursePayload = Required<CoursePayload>;
+
+const isValidCoursePayload = (
+  payload: CoursePayload
+): payload is CompleteCoursePayload =>
+  Boolean(
+    payload.Course_Title &&
+      payload.image &&
+      payload.userId &&
+      payload.Course_Duration &&
+      payload.Level &&
+      payload.Enrollment_Count !== undefined &&
+      payload.Status
+  );
 
 export async function POST(req: NextRequest) {
   await connectMongoDB();
 
   try {
-    const {
-      Course_Title,
-      image,
-      userId,
-      Course_Duration,
-      Level,
-      Enrollment_Count,
-      Status,
-    } = await req.json();
+    const payload = (await req.json()) as CoursePayload;
     const time = new Date();
 
-    // ตรวจสอบว่าค่าของ userId ถูกต้องและแปลงเป็น ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
+    if (!isValidCoursePayload(payload)) {
+      return NextResponse.json(
+        { message: "Course payload is incomplete", time },
+        { status: 400 }
+      );
+    }
+
+    if (!Types.ObjectId.isValid(payload.userId)) {
       return NextResponse.json(
         { message: "userId is not a valid ObjectId", time },
         { status: 400 }
       );
     }
 
-    const userObjectId = new Types.ObjectId(userId);
-
-
-    // ตรวจสอบว่ามี Course_Title สำหรับ userId นี้อยู่แล้วหรือไม่
+    const userObjectId = new Types.ObjectId(payload.userId);
     const existingPost = await Courses.findOne({
-      Course_Title,
-      userId: userObjectId
+      Course_Title: payload.Course_Title,
+      userId: userObjectId,
     });
 
     if (existingPost) {
       return NextResponse.json(
-        { message: "ผู้สอนนี้มีชื่อรายการนี้มีอยู่แล้ว กรุณาใช้ชื่ออื่น", time },
+        { message: "This course already exists for this instructor", time },
         { status: 400 }
       );
     }
 
-    // สร้างรายการใหม่
     const newCourse = await Courses.create({
-      Course_Title,
-      image,
+      Course_Title: payload.Course_Title,
+      image: payload.image,
       userId: userObjectId,
-      Course_Duration,
-      Level,
-      Enrollment_Count,
-      Status,
+      Course_Duration: payload.Course_Duration,
+      Level: payload.Level,
+      Enrollment_Count: payload.Enrollment_Count,
+      Status: payload.Status,
       createdAt: time,
     });
+    const syncResult = await syncCourseToTypesense(newCourse._id.toString());
 
     return NextResponse.json(
-      { message: "Success add product", time, newCourse },
+      { message: "Success add product", time, newCourse, syncResult },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating course:", error);
     return NextResponse.json(
-      { message: "Failed to create course", error },
+      {
+        message: "Failed to create course",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

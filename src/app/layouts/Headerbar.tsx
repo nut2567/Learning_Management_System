@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 export default function Layout({}) {
   return (
     <nav className="w-full flex justify-center border-b border-b-foreground/10 h-[80px] bg-white z-40 sticky top-0">
@@ -13,6 +14,8 @@ export default function Layout({}) {
           />
         </div>
         <div className="flex gap-5">
+          <Link href="/">Courses</Link>
+          <Link href="/manage">Manage</Link>
           <p>Portfolio</p>
           <p>Nutthawat Witdumring</p>
         </div>
@@ -25,7 +28,7 @@ export default function Layout({}) {
               <a
                 href="https://nextjs.org/"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="relative aspect-video min-h-4"
               >
                 {/* <NextLogo /> */}

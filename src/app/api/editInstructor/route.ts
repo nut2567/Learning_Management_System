@@ -1,5 +1,6 @@
 
 import { connectMongoDB } from '@lib/mongodb';
+import { syncInstructorCoursesToTypesense } from '@lib/course-search-sync';
 import {User} from '@models/schema';
 import { NextResponse,NextRequest } from 'next/server';
 
@@ -19,13 +20,17 @@ import { NextResponse,NextRequest } from 'next/server';
     if (existingPost&&existingPost._id.toString() !==id) {
     return NextResponse.json({message:"มีชื่อรายการผู้สอนนี้อยู่แล้ว กรุณาใช้ชื่ออื่น",time},{status: 200})
     }
-    await User.findByIdAndUpdate(id, {
+    const updatedInstructor = await User.findByIdAndUpdate(id, {
       Instructor_Name ,
       age ,
       email ,
       image,
       phone,
-    });
+    }, { new: true });
+
+    if (updatedInstructor && id) {
+      await syncInstructorCoursesToTypesense(id);
+    }
   
     return NextResponse.json({ message: "Success update user", time }, { status: 200 });
   }
