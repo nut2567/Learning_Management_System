@@ -134,7 +134,7 @@ export default function CourseManager() {
       ) : null}
 
       {pendingDeleteCourse ? (
-        <dialog className="modal modal-open">
+        <dialog open className="modal modal-open">
           <div className="modal-box">
             <div className="mb-4 flex items-start justify-between gap-4">
               <h2 className="text-lg font-bold">Delete course</h2>
